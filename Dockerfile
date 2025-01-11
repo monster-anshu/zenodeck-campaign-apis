@@ -5,9 +5,6 @@ FROM node:20-alpine AS build
 
 WORKDIR /usr/src/app
 
-# Set environment for production
-ENV NODE_ENV=production
-
 COPY package*.json ./
 
 # Install app dependencies using `npm ci`
@@ -17,6 +14,12 @@ COPY . .
 
 # Run the build command
 RUN npm run build
+
+# Set environment for production
+ENV NODE_ENV=production
+
+# Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
+RUN npm ci --omit=dev && npm cache clean --force
 
 ###################
 # PRODUCTION
