@@ -24,7 +24,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 ###################
 # PRODUCTION
 ###################
-FROM node:20-alpine AS production
+FROM gcr.io/distroless/nodejs20-debian12 AS production
 
 WORKDIR /usr/src/app
 
@@ -35,4 +35,4 @@ COPY --from=build /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+CMD [ "dist/main.js" ]
