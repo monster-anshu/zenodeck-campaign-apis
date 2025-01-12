@@ -1,8 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { AcceptInviteDto } from './dto/accept-invite.dto';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { PopulateDefaultDto } from './dto/populate-default.dto';
+import { InternalGuard } from './internal.guard';
 import { InternalService } from './internal.service';
 
+@UseGuards(InternalGuard)
 @Controller('internal')
 export class InternalController {
   constructor(private readonly internalService: InternalService) {}
@@ -13,9 +14,9 @@ export class InternalController {
     return res;
   }
 
-  @Post('accept-invite')
-  async acceptInvite(body: AcceptInviteDto) {
-    const res = await this.internalService.acceptInvite(body);
-    return res;
-  }
+  // @Post('accept-invite')
+  // async acceptInvite(body: AcceptInviteDto) {
+  //   const res = await this.internalService.acceptInvite(body);
+  //   return res;
+  // }
 }
