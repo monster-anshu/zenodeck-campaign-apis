@@ -1,10 +1,12 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { AppModule } from '~/app.module';
+import { PORT } from '~/env';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -15,6 +17,7 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('/api/v1/campaign');
+  app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
     .setTitle('Zenodeck Campaign Apis')
@@ -25,6 +28,6 @@ async function bootstrap() {
     useGlobalPrefix: true,
   });
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(PORT, '0.0.0.0');
 }
 bootstrap();
