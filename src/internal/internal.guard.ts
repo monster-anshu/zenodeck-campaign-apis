@@ -4,7 +4,7 @@ import {
   HttpException,
   Injectable,
 } from '@nestjs/common';
-import type { FastifyRequest } from 'fastify';
+import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { CAMPAIGN_APP_API_KEY } from '~/env';
 
@@ -13,7 +13,7 @@ export class InternalGuard implements CanActivate {
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest() as FastifyRequest;
+    const request = context.switchToHttp().getRequest() as Request;
     if (request.headers['x-api-key'] != CAMPAIGN_APP_API_KEY) {
       throw new HttpException('Forbidden', 401);
     }
