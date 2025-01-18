@@ -23,14 +23,18 @@ const EncryptionSchema = new Schema(
   }
 );
 
+export const BrandingSchema = new Schema({
+  logo: { type: String },
+  name: { type: String, required: true },
+  url: { type: String },
+});
+
 // Company details
 const CampaignAppSchema = new Schema(
   {
+    branding: { type: BrandingSchema, required: true },
     companyId: { type: Schema.Types.ObjectId, required: true, index: true },
     companyProductId: { type: Schema.Types.ObjectId, required: true },
-    companyLogo: { type: String },
-    companyName: { type: String, required: true },
-    companyUrl: { type: String },
     status: { type: String, enum: BOOKING_APP_STATUS, default: 'ACTIVE' },
     encryption: {
       type: EncryptionSchema,
