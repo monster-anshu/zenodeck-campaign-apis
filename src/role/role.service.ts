@@ -45,4 +45,13 @@ export class RoleService {
     }
     return superAdminRole!._id.toString();
   }
+
+  async getById(appId: string, roleId: string) {
+    const role = await RoleModel.findOne({
+      _id: new Types.ObjectId(roleId),
+      appId: new Types.ObjectId(appId),
+    }).lean();
+
+    return role;
+  }
 }

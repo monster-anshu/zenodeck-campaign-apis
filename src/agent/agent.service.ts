@@ -1,9 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { AgentModel } from '~/mongo/campaign';
+import { Agent, AgentDetails, AgentModel } from '~/mongo/campaign';
 import UserModel from '~/mongo/common/schema/User';
+import { User } from '~/mongo/common/types';
+import { RoleService } from '~/role/role.service';
 
 @Injectable()
 export class AgentService {
+  static readonly AgentSelectFields = {
+    _id: 1,
+    appId: 1,
+    countryCode: 1,
+    dateFormat: 1,
+    firstName: 1,
+    holidayId: 1,
+    language: 1,
+    lastName: 1,
+    profilePic: 1,
+    roleId: 1,
+    status: 1,
+    timeFormat: 1,
+    timezone: 1,
+    userId: 1,
+    orufyConnectRestoreId: 1,
+  };
+
+  constructor(private readonly roleService: RoleService) {}
+
   async createAgents({
     appId,
     userIds,
@@ -30,6 +52,89 @@ export class AgentService {
     });
     const createdAgents = await AgentModel.insertMany(agents);
     return createdAgents || [];
+  }
+
+  async getAgentInfoWithRole({
+    appId,
+    userId,
+    fetchRole = false,
+    decrypted = false,
+    isInvited = false,
+  }: {
+    appId: string;
+    userId: string;
+    fetchRole?: boolean;
+    decrypted?: boolean;
+    isInvited?: boolean;
+  }): Promise<AgentDetails | null> {
+    const [adminInfo, agentInfo] = await Promise.all([
+      UserModel.findOne(
+        {
+          _id: userId,
+          status: isInvited
+            ? {
+                $in: ['ACTIVE', 'UNVERIFIED'],
+              }
+            : 'ACTIVE',
+        },
+        {
+          emailId: 1,
+          firstName: 1,
+          lastName: 1,
+          mobileNo: 1,
+          countryCode: 1,
+        }
+      ).lean(),
+      AgentModel.findOne({
+        appId,
+        userId,
+        status: isInvited ? 'INVITED' : 'ACTIVE',
+      })
+        .select(AgentService.AgentSelectFields)
+        .lean(),
+    ]);
+
+    if (!adminInfo || !agentInfo) {
+      return null;
+    }
+
+    const userDet = this.getFormattedUserInfo({
+      adminInfo,
+      agentInfo,
+      decrypted,
+    });
+
+    const role = fetchRole
+      ? await this.roleService.getById(appId, agentInfo.roleId.toString())
+      : null;
+    return { ...userDet, role };
+  }
+
+  private getFormattedUserInfo({
+    adminInfo,
+    agentInfo,
+    // decrypted = false,
+  }: {
+    adminInfo: User;
+    agentInfo: Agent;
+    decrypted?: boolean;
+  }): AgentDetails {
+    let firstName = adminInfo.firstName || '';
+    let lastName = adminInfo.lastName || '';
+    if (agentInfo.firstName || agentInfo.lastName) {
+      firstName = agentInfo.firstName || '';
+      lastName = agentInfo.lastName || '';
+    }
+
+    return {
+      ...agentInfo,
+      emailId: adminInfo.emailId,
+      mobileNo: adminInfo.mobileNo,
+      countryCode: agentInfo.countryCode || adminInfo.countryCode,
+      firstName,
+      lastName,
+      name: [firstName, lastName].filter(Boolean).join(' '),
+    };
   }
 }
 
