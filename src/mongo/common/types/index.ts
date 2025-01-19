@@ -84,6 +84,13 @@ export interface CurrentPlan {
   isTrialPlan: boolean;
   isStopped: boolean;
   isFreemiumPackage?: boolean;
+  isAutoDowngraded?: boolean;
+  downgradeInfo?: {
+    packageId: Types.ObjectId;
+    startDate: Date;
+    expiryDate: Date;
+    isTrialPlan: boolean;
+  };
 }
 
 export enum BillingFrequency {

@@ -1,6 +1,5 @@
-import { AgentDetails, CompanyPlan } from '~/agent/agent.service';
 import { Session, SetSessionType } from '~/session/session.decorator';
-import { CampaignApp } from './mongo/campaign';
+import { AgentDetails, CampaignApp } from './mongo/campaign';
 
 export declare global {
   namespace Express {

@@ -6,7 +6,6 @@ import { Session } from './session.decorator';
 
 export const SessionMiddlewareFn: RequestHandler = async (req, res, next) => {
   const token = req.cookies?.__session;
-  console.log({ token });
   const decoded = await verifyJwt(token);
 
   req.session = decoded;
