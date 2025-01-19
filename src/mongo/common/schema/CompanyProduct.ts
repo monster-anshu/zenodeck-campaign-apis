@@ -56,6 +56,13 @@ const CurrentPlanSchema = new Schema<CurrentPlan>(
     isTrialPlan: Boolean,
     isStopped: Boolean,
     isFreemiumPackage: Boolean,
+    isAutoDowngraded: Boolean,
+    downgradeInfo: {
+      packageId: Schema.Types.ObjectId,
+      startDate: Date,
+      expiryDate: Date,
+      isTrialPlan: Boolean,
+    },
   },
   {
     timestamps: true,
