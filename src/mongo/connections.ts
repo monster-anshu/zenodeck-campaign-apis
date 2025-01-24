@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { MONGO_COMMON_URI, MONGO_DEFAULT_URI } from '~/env';
+import { MONGO_COMMON_URI, MONGO_DEFAULT_URI, STAGE } from '~/env';
 
-const isProd = process.env.NODE_ENV !== 'development';
+const isProd = STAGE === 'prod';
 
 if (!isProd) {
   mongoose.set('debug', true);

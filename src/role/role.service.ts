@@ -27,13 +27,13 @@ export class RoleService {
         modifiedBy: new Types.ObjectId(userId),
       },
       // {
-      //   appId: new Types.ObjectId(appId),
+      //   appId: ObjectId(appId),
       //   name: 'User',
       //   status: 'ACTIVE',
       //   permissions: {},
       //   isAutoCreated: true,
-      //   createdBy: new Types.ObjectId(userId),
-      //   modifiedBy: new Types.ObjectId(userId),
+      //   createdBy: ObjectId(userId),
+      //   modifiedBy: ObjectId(userId),
       // },
     ];
     let superAdminRole;
@@ -48,8 +48,8 @@ export class RoleService {
 
   async getById(appId: string, roleId: string) {
     const role = await RoleModel.findOne({
-      _id: new Types.ObjectId(roleId),
-      appId: new Types.ObjectId(appId),
+      _id: roleId,
+      appId: appId,
     }).lean();
 
     return role;
