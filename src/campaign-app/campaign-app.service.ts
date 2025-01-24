@@ -32,12 +32,14 @@ export class CampaignAppService {
     const company = await CampaignAppModel.create({
       companyId,
       companyProductId: productInfo._id,
-      companyName: companyName,
       status: 'ACTIVE',
       encryption: {
         algorithm: encrypt('aes256'),
         initVector: encrypt(randomString(16)),
         securitykey: encrypt(randomString(32)),
+      },
+      branding: {
+        name: companyName,
       },
     });
 
