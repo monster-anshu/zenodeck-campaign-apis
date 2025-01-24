@@ -5,12 +5,15 @@ import {
   NotFoundException,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { AgentGuard } from '~/agent/agent.guard';
 import { GetSession } from '~/session/session.decorator';
 import { CredentialService } from './credential.service';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
+@UseGuards(AgentGuard)
 @Controller('credential')
 export class CredentialController {
   constructor(private readonly credentialService: CredentialService) {}
