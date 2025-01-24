@@ -1,9 +1,10 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { MongoIdZod } from '~/lib/zod';
 
 const PopulateDefaultZod = z.object({
-  userId: z.string(),
-  companyId: z.string(),
+  userId: MongoIdZod,
+  companyId: MongoIdZod,
   companyName: z.string().nonempty(),
 });
 

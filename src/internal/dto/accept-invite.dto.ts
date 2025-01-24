@@ -1,9 +1,10 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { MongoIdZod } from '~/lib/zod';
 
 const AcceptInviteZod = z.object({
-  userId: z.string(),
-  companyId: z.string(),
+  userId: MongoIdZod,
+  companyId: MongoIdZod,
 });
 
 export class AcceptInviteDto extends createZodDto(AcceptInviteZod) {}

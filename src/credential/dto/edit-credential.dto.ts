@@ -1,9 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import { MongoIdZod } from '~/lib/zod';
 import { AddCredentialZod } from './add-credential.dto';
 
 const EditCredentialZod = AddCredentialZod.partial().extend({
-  id: z.string(),
+  id: MongoIdZod,
 });
 
 export class EditCredentialDto extends createZodDto(EditCredentialZod) {}
