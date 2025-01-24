@@ -44,6 +44,7 @@ const CampaignAppSchema = new Schema(
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 

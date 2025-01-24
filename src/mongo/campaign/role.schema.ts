@@ -51,6 +51,7 @@ const RoleSchema = new Schema(
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 
