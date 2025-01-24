@@ -80,4 +80,21 @@ export class CredentialService {
 
     return credential;
   }
+
+  async delete(appId: string, id: string) {
+    const credential = await CredentialModel.findOneAndUpdate(
+      {
+        appId: appId,
+        id: id,
+        status: 'ACTIVE',
+      },
+      {
+        $set: {
+          status: 'DELETED',
+        },
+      }
+    ).lean();
+
+    return credential;
+  }
 }

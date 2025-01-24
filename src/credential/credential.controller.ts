@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
+  Param,
   Patch,
   Post,
   UseGuards,
@@ -57,6 +59,22 @@ export class CredentialController {
     return {
       isSuccess: true,
       credential,
+    };
+  }
+
+  @Delete(':credentialId')
+  async delete(
+    @GetSession('appId') appId: string,
+    @Param('credentialId') credentialId: string
+  ) {
+    const credential = await this.credentialService.delete(appId, credentialId);
+
+    if (!credential) {
+      throw new NotFoundException();
+    }
+
+    return {
+      isSuccess: true,
     };
   }
 }
