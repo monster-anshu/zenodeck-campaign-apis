@@ -1,9 +1,9 @@
-import { IsString } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class AcceptInviteDto {
-  @IsString()
-  userId!: string;
+const AcceptInviteZod = z.object({
+  userId: z.string(),
+  companyId: z.string(),
+});
 
-  @IsString()
-  companyId!: string;
-}
+export class AcceptInviteDto extends createZodDto(AcceptInviteZod) {}

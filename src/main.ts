@@ -1,8 +1,8 @@
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as morgan from 'morgan';
+import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 import { AppModule } from '~/app.module';
 import { PORT } from '~/env';
 import { SessionMiddlewareFn } from './session/session.middleware';
@@ -15,7 +15,7 @@ async function bootstrap() {
   app.use(SessionMiddlewareFn);
 
   app.setGlobalPrefix('/api/v1/campaign');
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ZodValidationPipe());
 
   const config = new DocumentBuilder()
     .setTitle('Zenodeck Campaign Apis')
@@ -28,4 +28,6 @@ async function bootstrap() {
 
   await app.listen(PORT, '0.0.0.0');
 }
+
+patchNestJsSwagger();
 bootstrap();

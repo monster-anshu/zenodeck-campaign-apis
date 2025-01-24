@@ -1,13 +1,10 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class PopulateDefaultDto {
-  @IsString()
-  userId!: string;
+const PopulateDefaultZod = z.object({
+  userId: z.string(),
+  companyId: z.string(),
+  companyName: z.string().nonempty(),
+});
 
-  @IsString()
-  companyId!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  companyName!: string;
-}
+export class PopulateDefaultDto extends createZodDto(PopulateDefaultZod) {}
