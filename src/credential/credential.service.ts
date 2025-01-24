@@ -1,19 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { Credential, CredentialModel } from '~/mongo/campaign';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
 @Injectable()
 export class CredentialService {
+  async list(appId: string) {
+    const credentials = await CredentialModel.find(
+      {
+        appId: appId,
+        status: 'ACTIVE',
+      },
+      {
+        appId: 1,
+        createdAt: 1,
+        createdBy: 1,
+        name: 1,
+        status: 1,
+        type: 1,
+        updatedAt: 1,
+      }
+    ).lean();
+
+    return credentials;
+  }
+
   async add(
     appId: string,
     userId: string,
     { privateKeys, type, name }: AddCredentialDto
   ) {
+    console.log({ appId, userId });
     const doc = await CredentialModel.create({
-      appId: new Types.ObjectId(appId),
-      createdBy: new Types.ObjectId(userId),
+      appId: appId,
+      createdBy: userId,
       name: name,
       privateKeys: privateKeys, // TODO: encrypt private keys using app specify encryption
       type: type,
@@ -44,8 +64,8 @@ export class CredentialService {
 
     const credential = await CredentialModel.findOneAndUpdate(
       {
-        appId: new Types.ObjectId(appId),
-        id: new Types.ObjectId(id),
+        appId: appId,
+        id: id,
         status: 'ACTIVE',
       },
       {
@@ -57,10 +77,6 @@ export class CredentialService {
     )
       .select('-privateKeys')
       .lean();
-
-    if (!credential) {
-      throw new NotFoundException();
-    }
 
     return credential;
   }
