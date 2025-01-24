@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { Credential, CredentialModel } from '~/mongo/campaign';
 import { AddCredentialDto } from './dto/add-credential.dto';
@@ -57,6 +57,10 @@ export class CredentialService {
     )
       .select('-privateKeys')
       .lean();
+
+    if (!credential) {
+      throw new NotFoundException();
+    }
 
     return credential;
   }
