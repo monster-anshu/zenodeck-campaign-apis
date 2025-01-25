@@ -3,19 +3,28 @@ import { Encryption } from '../campaign-app';
 
 type Data = { [key: string]: Data | string };
 
-export const encryptDescryptJsonUsingKeyIv = (
-  obj: Data,
+export const encryptDescryptJsonUsingKeyIv = <T extends Data>(
+  obj: T,
   encryption: Encryption,
   isEncrypt = true
 ) => {
+  const result = {} as T;
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
-      obj[key] = encryptDescryptJsonUsingKeyIv(obj[key], encryption, isEncrypt);
+      result[key] = encryptDescryptJsonUsingKeyIv(
+        obj[key],
+        encryption,
+        isEncrypt
+      );
     } else if (typeof obj[key] === 'string') {
-      obj[key] = isEncrypt
-        ? encryptUsingKeyIv(obj[key], encryption)
-        : decryptUsingKeyIv(obj[key], encryption);
+      result[key] = (
+        isEncrypt
+          ? encryptUsingKeyIv(obj[key], encryption)
+          : decryptUsingKeyIv(obj[key], encryption)
+      ) as T[typeof key];
+    } else {
+      result[key] = obj[key];
     }
   }
-  return obj;
+  return result;
 };
