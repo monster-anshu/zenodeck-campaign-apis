@@ -7,11 +7,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AgentDetails } from '~/mongo/campaign';
-import {
-  GetAgentInfo,
-  GetSession,
-  SetSession,
-} from '~/session/session.decorator';
+import { GetAgentInfo, GetSession } from '~/session/session.decorator';
 import { AgentGuard } from './agent.guard';
 
 @UseGuards(AgentGuard)
@@ -22,7 +18,6 @@ export class AgentController {
     @GetSession('appId') appId: string,
     @GetSession('userId') userId: string,
     @GetSession('companyId') companyId: string,
-    @SetSession() setSession: (key: string, value?: unknown) => void,
     // @GetCompanyPlan() companyPlan: CompanyPlan,
     @Req() req: Request,
     @GetAgentInfo() agentInfo: AgentDetails
@@ -30,12 +25,6 @@ export class AgentController {
     const appInfo = req.appInfo;
     if (!appInfo) {
       throw new UnauthorizedException('Forbidden');
-    }
-    if (setSession) {
-      setSession('bookingsApp', {
-        appId,
-        companyId,
-      });
     }
     delete (appInfo as Record<string, unknown>).encryption;
     return {
