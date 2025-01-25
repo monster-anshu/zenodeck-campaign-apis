@@ -1,14 +1,14 @@
 import { Types } from 'mongoose';
-import { CampaignApp, CampaignAppModel } from '~/mongo/campaign';
+import { CampaignAppEncryption, CampaignAppModel } from '~/mongo/campaign';
 import { decrypt } from './crypto';
 
 type GetAppEncryptionKeyOptions =
   | {
       appId: string | Types.ObjectId;
-      campaignApp?: CampaignApp;
+      campaignApp?: CampaignAppEncryption;
     }
   | {
-      campaignApp: CampaignApp;
+      campaignApp: CampaignAppEncryption;
       appId?: string | Types.ObjectId;
     };
 

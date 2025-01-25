@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Credential, CredentialModel } from '~/mongo/campaign';
+import { getAppEncryptionKey } from '~/lib/campaign-app';
+import { encryptDescryptJsonUsingKeyIv } from '~/lib/crypto/json';
+import {
+  CampaignAppEncryption,
+  Credential,
+  CredentialModel,
+} from '~/mongo/campaign';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
@@ -28,14 +34,15 @@ export class CredentialService {
   async add(
     appId: string,
     userId: string,
-    { privateKeys, type, name }: AddCredentialDto
+    { privateKeys, type, name }: AddCredentialDto,
+    campaignApp: CampaignAppEncryption
   ) {
-    console.log({ appId, userId });
+    const encryption = await getAppEncryptionKey({ campaignApp });
     const doc = await CredentialModel.create({
       appId: appId,
       createdBy: userId,
       name: name,
-      privateKeys: privateKeys, // TODO: encrypt private keys using app specify encryption
+      privateKeys: encryptDescryptJsonUsingKeyIv(privateKeys, encryption),
       type: type,
     });
     const credential = doc.toObject();
@@ -46,7 +53,8 @@ export class CredentialService {
   async edit(
     appId: string,
     userId: string,
-    { id, name, privateKeys, type }: EditCredentialDto
+    { id, name, privateKeys, type }: EditCredentialDto,
+    campaignApp: CampaignAppEncryption
   ) {
     const set: Partial<Credential> = {};
 
@@ -55,7 +63,8 @@ export class CredentialService {
     }
 
     if (privateKeys) {
-      set.privateKeys = privateKeys; // TODO: encrypt with app specify enctryption
+      const encryption = await getAppEncryptionKey({ campaignApp });
+      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
     }
 
     if (type) {

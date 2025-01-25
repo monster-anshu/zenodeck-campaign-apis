@@ -10,7 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AgentGuard } from '~/agent/agent.guard';
-import { GetSession } from '~/session/session.decorator';
+import { CampaignApp } from '~/mongo/campaign';
+import { GetCampaignApp, GetSession } from '~/session/session.decorator';
 import { CredentialService } from './credential.service';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
@@ -34,9 +35,15 @@ export class CredentialController {
   async add(
     @Body() body: AddCredentialDto,
     @GetSession('appId') appId: string,
-    @GetSession('userId') userId: string
+    @GetSession('userId') userId: string,
+    @GetCampaignApp() campaignApp: CampaignApp
   ) {
-    const credential = await this.credentialService.add(appId, userId, body);
+    const credential = await this.credentialService.add(
+      appId,
+      userId,
+      body,
+      campaignApp
+    );
 
     return {
       isSuccess: true,
@@ -48,9 +55,15 @@ export class CredentialController {
   async edit(
     @Body() body: EditCredentialDto,
     @GetSession('appId') appId: string,
-    @GetSession('userId') userId: string
+    @GetSession('userId') userId: string,
+    @GetCampaignApp() campaignApp: CampaignApp
   ) {
-    const credential = await this.credentialService.edit(appId, userId, body);
+    const credential = await this.credentialService.edit(
+      appId,
+      userId,
+      body,
+      campaignApp
+    );
 
     if (!credential) {
       throw new NotFoundException();

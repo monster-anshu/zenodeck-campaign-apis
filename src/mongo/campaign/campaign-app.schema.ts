@@ -1,4 +1,4 @@
-import { InferSchemaType, Schema } from 'mongoose';
+import { InferSchemaType, Schema, Types } from 'mongoose';
 import { MONGO_CONNECTION } from '../connections';
 
 const BOOKING_APP_STATUS = ['ACTIVE', 'DELETED'] as const;
@@ -48,7 +48,10 @@ const CampaignAppSchema = new Schema(
   }
 );
 
-export type CampaignApp = InferSchemaType<typeof CampaignAppSchema>;
+export type CampaignApp = InferSchemaType<typeof CampaignAppSchema> & {
+  _id: Types.ObjectId;
+};
+export type CampaignAppEncryption = Pick<CampaignApp, 'encryption'>;
 
 export const CampaignAppModel = MONGO_CONNECTION.DEFAULT.model<CampaignApp>(
   'campaignApp',
