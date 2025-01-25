@@ -19,14 +19,15 @@ export type Session = {
 export const GetSession = createParamDecorator(
   (key: keyof Session | 'appId', ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
+
     if (key === 'appId') {
-      return request.appInfo?._id.toString();
+      return request.appInfo?._id?.toString();
     }
     if (key === 'companyId') {
-      return request.appInfo?.companyId.toString();
+      return request.appInfo?.companyId?.toString();
     }
     if (key === 'userId') {
-      return request.userInfo?.userId.toString();
+      return request.userInfo?.userId?.toString();
     }
     return request.session?.[key];
   }

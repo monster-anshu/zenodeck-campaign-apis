@@ -68,6 +68,7 @@ export class AgentGuard implements CanActivate {
         companyId,
         projection: {
           encryption: 1,
+          companyId: 1,
         },
       }),
     ]);

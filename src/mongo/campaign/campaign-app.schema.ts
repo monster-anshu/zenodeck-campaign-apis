@@ -23,11 +23,16 @@ const EncryptionSchema = new Schema(
   }
 );
 
-export const BrandingSchema = new Schema({
-  logo: { type: String },
-  name: { type: String, required: true },
-  url: { type: String },
-});
+export const BrandingSchema = new Schema(
+  {
+    logo: { type: String },
+    name: { type: String, required: true },
+    url: { type: String },
+  },
+  {
+    _id: false,
+  }
+);
 
 // Company details
 const CampaignAppSchema = new Schema(
