@@ -12,3 +12,4 @@ export const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY as string;
 
 export const SESSION_JWT_SECRET = process.env.SESSION_JWT_SECRET as string;
 export const ROOT_DOMAIN = process.env.ROOT_DOMAIN as string;
+export const USER_SERVICE_DOMAIN = 'accounts.' + ROOT_DOMAIN;

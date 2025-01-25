@@ -6,6 +6,7 @@ import { CampaignAppModule } from '~/campaign-app/campaign-app.module';
 import { InternalModule } from '~/internal/internal.module';
 import { RoleModule } from '~/role/role.module';
 import { CredentialModule } from './credential/credential.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CredentialModule } from './credential/credential.module';
     RoleModule,
     CampaignAppModule,
     CredentialModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

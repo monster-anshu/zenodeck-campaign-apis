@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { CampaignAppService } from '~/campaign-app/campaign-app.service';
-import { ROOT_DOMAIN } from '~/env';
+import { USER_SERVICE_DOMAIN } from '~/env';
 import CompanyUserPermissionModel from '~/mongo/common/schema/CompanyUserPermission';
 import { AgentService } from './agent.service';
 
@@ -49,12 +49,12 @@ export class AgentGuard implements CanActivate {
       } else if (!userCompanies?.length) {
         response.header(
           'x-zenodeck-redirect',
-          `${ROOT_DOMAIN}/fill-details?redirect=BOOKINGS`
+          `${USER_SERVICE_DOMAIN}/fill-details?productId=CAMPAIGN`
         );
       } else {
         response.header(
-          'x-orufy-redirect',
-          `${ROOT_DOMAIN}/company-list?redirect=BOOKINGS`
+          'x-zenodeck-redirect',
+          `${USER_SERVICE_DOMAIN}/company-list?productId=CAMPAIGN`
         );
       }
     }
@@ -68,6 +68,7 @@ export class AgentGuard implements CanActivate {
         companyId,
         projection: {
           encryption: 1,
+          companyId: 1,
         },
       }),
     ]);

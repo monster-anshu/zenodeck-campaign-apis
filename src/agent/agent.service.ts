@@ -21,7 +21,6 @@ export class AgentService {
     timeFormat: 1,
     timezone: 1,
     userId: 1,
-    orufyConnectRestoreId: 1,
   };
 
   constructor(private readonly roleService: RoleService) {}
