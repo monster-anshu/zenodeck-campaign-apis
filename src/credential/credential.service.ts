@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { getAppEncryptionKey } from '~/lib/campaign-app';
 import { encryptDescryptJsonUsingKeyIv } from '~/lib/crypto/json';
 import {
@@ -11,21 +11,23 @@ import { EditCredentialDto } from './dto/edit-credential.dto';
 
 @Injectable()
 export class CredentialService {
+  static readonly BasicProjection = {
+    appId: 1,
+    createdAt: 1,
+    createdBy: 1,
+    name: 1,
+    status: 1,
+    type: 1,
+    updatedAt: 1,
+  };
+
   async list(appId: string) {
     const credentials = await CredentialModel.find(
       {
         appId: appId,
         status: 'ACTIVE',
       },
-      {
-        appId: 1,
-        createdAt: 1,
-        createdBy: 1,
-        name: 1,
-        status: 1,
-        type: 1,
-        updatedAt: 1,
-      }
+      CredentialService.BasicProjection
     ).lean();
 
     return credentials;
@@ -45,7 +47,7 @@ export class CredentialService {
       privateKeys: encryptDescryptJsonUsingKeyIv(privateKeys, encryption),
       type: type,
     });
-    const credential = doc.toObject();
+    const credential = doc.toObject() as Partial<Credential>;
     delete credential.privateKeys;
     return credential;
   }
@@ -103,6 +105,39 @@ export class CredentialService {
         },
       }
     ).lean();
+
+    return credential;
+  }
+
+  async getById(
+    appId: string,
+    id: string,
+    campaignApp?: CampaignAppEncryption
+  ) {
+    const projection = campaignApp
+      ? { ...CredentialService.BasicProjection, privateKeys: 1 }
+      : CredentialService.BasicProjection;
+
+    const credential = await CredentialModel.findOne(
+      {
+        appId: appId,
+        _id: id,
+      },
+      projection
+    ).lean();
+
+    if (!credential) {
+      throw new NotFoundException('CREDENTIAL_NOT_FOUND');
+    }
+
+    if (campaignApp) {
+      const encryption = await getAppEncryptionKey({ campaignApp });
+      credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+        credential.privateKeys,
+        encryption,
+        false
+      );
+    }
 
     return credential;
   }

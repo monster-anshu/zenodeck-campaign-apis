@@ -26,7 +26,7 @@ const CredentialSchema = new Schema(
     name: {
       type: String,
     },
-    privateKeys: PrivateKeysSchema,
+    privateKeys: { type: PrivateKeysSchema, required: true },
     status: {
       default: 'ACTIVE',
       enum: CREDENTIAL_STATUS,
