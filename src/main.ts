@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import * as morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 import { AppModule } from '~/app.module';
 import { PORT } from '~/env';

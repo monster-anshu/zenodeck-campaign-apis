@@ -5,7 +5,7 @@ import { MongoIdZod } from '~/lib/zod';
 const SendMailZod = z.object({
   credentialId: MongoIdZod,
   subject: z.string().nonempty(),
-  body: z.string().nonempty(),
+  projectData: z.string(),
   from: z.string().email(),
   to: z.string().email(),
 });

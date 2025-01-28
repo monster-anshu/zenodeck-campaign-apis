@@ -1,4 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
+import grapesjs from 'grapesjs';
+import juice from 'juice';
 import { CredentialService } from '~/credential/credential.service';
 import { CampaignAppEncryption, PrivateKeys } from '~/mongo/campaign';
 import { SendMailDto } from './dto/send-mail.dto';
@@ -10,7 +12,7 @@ export class MailService {
   async send(
     appId: string,
     userId: string,
-    { credentialId, ...body }: SendMailDto,
+    { credentialId, projectData, ...body }: SendMailDto,
     campaignApp: CampaignAppEncryption
   ) {
     const credential = await this.credentialService.getById(
@@ -19,13 +21,22 @@ export class MailService {
       campaignApp
     );
 
+    const html = this.generateHTML(projectData);
+
+    const payload = { ...body, html };
+
     if (credential.type === 'RESEND_API') {
-      return this.resendSend(body, credential.privateKeys);
+      return this.resendSend(payload, credential.privateKeys);
     }
   }
 
   async resendSend(
-    { body, subject, from, to }: Omit<SendMailDto, 'credentialId'>,
+    {
+      html,
+      subject,
+      from,
+      to,
+    }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
     privateKeys: PrivateKeys
   ) {
     const apiKey = privateKeys.apiKey;
@@ -40,7 +51,7 @@ export class MailService {
         from: from,
         to: Array.isArray(to) ? to : [to],
         subject: subject,
-        html: body,
+        html: html,
       }),
     });
 
@@ -51,5 +62,33 @@ export class MailService {
     }
 
     return true;
+  }
+
+  generateHTML(projectData: string | object) {
+    const prasedData =
+      typeof projectData === 'string' ? JSON.parse(projectData) : projectData;
+
+    const editor = grapesjs.init({
+      headless: true,
+      projectData: prasedData,
+    });
+
+    let html = `<!DOCTYPE html>
+            <html lang="en">
+              <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <style>
+                  ${editor.getCss()}
+                </style>
+              </head>
+              <body>
+                ${editor.getHtml()}
+              </body>
+            </html>`;
+
+    html = juice(html);
+
+    return html;
   }
 }
