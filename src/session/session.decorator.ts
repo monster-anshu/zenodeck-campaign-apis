@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 import { AgentDetails, CampaignApp } from '~/mongo/campaign';
 
 export type SetSessionType = <Key extends keyof Session>(
@@ -18,7 +18,7 @@ export type Session = {
 
 export const GetSession = createParamDecorator(
   (key: keyof Session | 'appId', ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<Request>();
+    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
 
     if (key === 'appId') {
       return request.appInfo?._id?.toString();
@@ -35,21 +35,21 @@ export const GetSession = createParamDecorator(
 
 export const GetAgentInfo = createParamDecorator(
   async (_: unknown, ctx: ExecutionContext): Promise<AgentDetails> => {
-    const request = ctx.switchToHttp().getRequest<Request>();
+    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
     return request.userInfo!;
   }
 );
 
 export const GetCampaignApp = createParamDecorator(
   async (_: unknown, ctx: ExecutionContext): Promise<CampaignApp> => {
-    const request = ctx.switchToHttp().getRequest<Request>();
+    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
     return request.appInfo!;
   }
 );
 
 export const SetSession = createParamDecorator(
   (_, ctx: ExecutionContext): SetSessionType => {
-    const req = ctx.switchToHttp().getRequest<Request>();
+    const req = ctx.switchToHttp().getRequest<FastifyRequest>();
     return (key, value) => {
       if (!req.session) return;
       //0 is allowed value
@@ -64,7 +64,7 @@ export const SetSession = createParamDecorator(
 
 export const GetCompanyPlan = createParamDecorator(
   (_, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<Request>();
+    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
     return request.companyPlan;
   }
 );

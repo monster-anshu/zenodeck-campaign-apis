@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { AgentDetails } from '~/mongo/campaign';
 import { GetAgentInfo, GetSession } from '~/session/session.decorator';
 import { AgentGuard } from './agent.guard';
@@ -19,7 +19,7 @@ export class AgentController {
     @GetSession('userId') userId: string,
     @GetSession('companyId') companyId: string,
     // @GetCompanyPlan() companyPlan: CompanyPlan,
-    @Req() req: Request,
+    @Req() req: FastifyRequest,
     @GetAgentInfo() agentInfo: AgentDetails
   ) {
     const appInfo = req.appInfo;
