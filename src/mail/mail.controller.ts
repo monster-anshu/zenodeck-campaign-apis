@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AgentGuard } from '~/agent/agent.guard';
 import { CampaignApp } from '~/mongo/campaign';
 import { GetCampaignApp, GetSession } from '~/session/session.decorator';
 import { SendMailDto } from './dto/send-mail.dto';
 import { MailService } from './mail.service';
-import { template } from './t';
 
 @UseGuards(AgentGuard)
 @Controller('mail')
@@ -23,10 +22,5 @@ export class MailController {
       isSuccess: true,
       res,
     };
-  }
-
-  @Get()
-  async get() {
-    return this.mailService.generateHTML(template);
   }
 }
