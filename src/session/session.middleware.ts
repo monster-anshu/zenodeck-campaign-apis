@@ -15,7 +15,7 @@ export const onHeader = async (req: FastifyRequest, res: FastifyReply) => {
     cookieDomains.push('localhost');
   }
   cookieDomains.forEach((cookieDomain) => {
-    res.cookie('__session', jwt, {
+    res.setCookie('__session', jwt, {
       maxAge: 90 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       secure: true,
