@@ -1,14 +1,14 @@
 ###################
 # BUILD FOR PRODUCTION
 ###################
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
 # Install app dependencies using `npm ci`
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY . .
 
@@ -19,7 +19,7 @@ RUN npm run build
 ENV NODE_ENV=production
 
 # Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
 ###################
 # PRODUCTION
