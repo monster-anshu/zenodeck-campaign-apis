@@ -24,7 +24,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 ###################
 # PRODUCTION
 ###################
-FROM gcr.io/distroless/nodejs20-debian12 AS production
+FROM gcr.io/distroless/nodejs22-debian12 AS production
 
 WORKDIR /usr/src/app
 

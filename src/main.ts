@@ -1,18 +1,27 @@
+import fastifyCookie from '@fastify/cookie';
 import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import * as morgan from 'morgan';
-import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
+import { patchNestJsSwagger, ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from '~/app.module';
 import { PORT } from '~/env';
-import { SessionMiddlewareFn } from './session/session.middleware';
+import { onHeader, SessionMiddlewareFn } from '~/session/session.middleware';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({ logger: true })
+  );
 
-  app.use(cookieParser());
-  app.use(morgan('tiny'));
-  app.use(SessionMiddlewareFn);
+  await app.register(fastifyCookie);
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('onRequest', SessionMiddlewareFn)
+    .addHook('onSend', onHeader);
 
   app.setGlobalPrefix('/api/v1/campaign');
   app.useGlobalPipes(new ZodValidationPipe());

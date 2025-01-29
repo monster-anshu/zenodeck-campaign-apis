@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 import { CampaignAppService } from '~/campaign-app/campaign-app.service';
 import { USER_SERVICE_DOMAIN } from '~/env';
 import CompanyUserPermissionModel from '~/mongo/common/schema/CompanyUserPermission';
@@ -18,7 +18,7 @@ export class AgentGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext) {
     const response = context.switchToHttp().getResponse();
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const session = request.session;
 
     if (!session) {
