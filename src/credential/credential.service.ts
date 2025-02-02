@@ -51,7 +51,7 @@ export class CredentialService {
     const credential = doc.toObject();
 
     credential.privateKeys = encryptDescryptJsonUsingKeyIv(
-      privateKeys,
+      credential.privateKeys,
       encryption,
       false
     );
