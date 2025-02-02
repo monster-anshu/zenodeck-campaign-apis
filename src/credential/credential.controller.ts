@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AgentGuard } from '~/agent/agent.guard';
@@ -22,8 +23,15 @@ export class CredentialController {
   constructor(private readonly credentialService: CredentialService) {}
 
   @Get()
-  async list(@GetSession('appId') appId: string) {
-    const credentials = await this.credentialService.list(appId);
+  async list(
+    @GetSession('appId') appId: string,
+    @GetCampaignApp() campaignApp: CampaignApp,
+    @Query('decrypt') decrypt: string
+  ) {
+    const credentials = await this.credentialService.list(
+      appId,
+      decrypt === 'true' ? campaignApp : null
+    );
 
     return {
       isSuccess: true,

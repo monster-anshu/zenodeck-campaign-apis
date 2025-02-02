@@ -21,16 +21,65 @@ export class CredentialService {
     updatedAt: 1,
   };
 
-  async list(appId: string) {
+  async list(appId: string, campaignApp?: CampaignAppEncryption | null) {
+    const projection = campaignApp
+      ? { ...CredentialService.BasicProjection, privateKeys: 1 }
+      : CredentialService.BasicProjection;
+
     const credentials = await CredentialModel.find(
       {
         appId: appId,
         status: 'ACTIVE',
       },
-      CredentialService.BasicProjection
+      projection
     ).lean();
 
+    if (campaignApp) {
+      const encryption = await getAppEncryptionKey({ campaignApp });
+      for (const credential of credentials) {
+        credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+          credential.privateKeys,
+          encryption,
+          false
+        );
+      }
+    }
+
     return credentials;
+  }
+
+  async getById(
+    appId: string,
+    id: string,
+    campaignApp?: CampaignAppEncryption
+  ) {
+    const projection = campaignApp
+      ? { ...CredentialService.BasicProjection, privateKeys: 1 }
+      : CredentialService.BasicProjection;
+
+    const credential = await CredentialModel.findOne(
+      {
+        appId: appId,
+        _id: id,
+        status: 'ACTIVE',
+      },
+      projection
+    ).lean();
+
+    if (!credential) {
+      throw new NotFoundException('CREDENTIAL_NOT_FOUND');
+    }
+
+    if (campaignApp) {
+      const encryption = await getAppEncryptionKey({ campaignApp });
+      credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+        credential.privateKeys,
+        encryption,
+        false
+      );
+    }
+
+    return credential;
   }
 
   async add(
@@ -121,40 +170,6 @@ export class CredentialService {
         },
       }
     ).lean();
-
-    return credential;
-  }
-
-  async getById(
-    appId: string,
-    id: string,
-    campaignApp?: CampaignAppEncryption
-  ) {
-    const projection = campaignApp
-      ? { ...CredentialService.BasicProjection, privateKeys: 1 }
-      : CredentialService.BasicProjection;
-
-    const credential = await CredentialModel.findOne(
-      {
-        appId: appId,
-        _id: id,
-        status: 'ACTIVE',
-      },
-      projection
-    ).lean();
-
-    if (!credential) {
-      throw new NotFoundException('CREDENTIAL_NOT_FOUND');
-    }
-
-    if (campaignApp) {
-      const encryption = await getAppEncryptionKey({ campaignApp });
-      credential.privateKeys = encryptDescryptJsonUsingKeyIv(
-        credential.privateKeys,
-        encryption,
-        false
-      );
-    }
 
     return credential;
   }
