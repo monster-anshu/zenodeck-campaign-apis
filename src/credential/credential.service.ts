@@ -6,8 +6,8 @@ import {
   Credential,
   CredentialModel,
 } from '~/mongo/campaign';
-import { AddCredentialDto } from './dto/add-credential.dto';
-import { EditCredentialDto } from './dto/edit-credential.dto';
+import { AddCredential } from './dto/add-credential.dto';
+import { EditCredential } from './dto/edit-credential.dto';
 
 @Injectable()
 export class CredentialService {
@@ -21,92 +21,31 @@ export class CredentialService {
     updatedAt: 1,
   };
 
-  async list(appId: string) {
+  async list(appId: string, campaignApp?: CampaignAppEncryption | null) {
+    const projection = campaignApp
+      ? { ...CredentialService.BasicProjection, privateKeys: 1 }
+      : CredentialService.BasicProjection;
+
     const credentials = await CredentialModel.find(
       {
         appId: appId,
         status: 'ACTIVE',
       },
-      CredentialService.BasicProjection
+      projection
     ).lean();
+
+    if (campaignApp) {
+      const encryption = await getAppEncryptionKey({ campaignApp });
+      for (const credential of credentials) {
+        credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+          credential.privateKeys,
+          encryption,
+          false
+        );
+      }
+    }
 
     return credentials;
-  }
-
-  async add(
-    appId: string,
-    userId: string,
-    { privateKeys, type, name }: AddCredentialDto,
-    campaignApp: CampaignAppEncryption
-  ) {
-    const encryption = await getAppEncryptionKey({ campaignApp });
-    const doc = await CredentialModel.create({
-      appId: appId,
-      createdBy: userId,
-      name: name,
-      privateKeys: encryptDescryptJsonUsingKeyIv(privateKeys, encryption),
-      type: type,
-    });
-    const credential = doc.toObject() as Partial<Credential>;
-    delete credential.privateKeys;
-    return credential;
-  }
-
-  async edit(
-    appId: string,
-    userId: string,
-    { id, name, privateKeys, type }: EditCredentialDto,
-    campaignApp: CampaignAppEncryption
-  ) {
-    const set: Partial<Credential> = {};
-
-    if (name) {
-      set.name = name;
-    }
-
-    if (privateKeys) {
-      const encryption = await getAppEncryptionKey({ campaignApp });
-      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
-    }
-
-    if (type) {
-      set.type = type;
-    }
-
-    const credential = await CredentialModel.findOneAndUpdate(
-      {
-        appId: appId,
-        id: id,
-        status: 'ACTIVE',
-      },
-      {
-        $set: set,
-      },
-      {
-        new: true,
-      }
-    )
-      .select('-privateKeys')
-      .lean();
-
-    return credential;
-  }
-
-  async delete(appId: string, id: string) {
-    const credential = await CredentialModel.findOneAndUpdate(
-      {
-        appId: appId,
-        id: id,
-        status: 'ACTIVE',
-      },
-      {
-        $set: {
-          status: 'DELETED',
-        },
-      }
-    ).lean();
-
-    return credential;
   }
 
   async getById(
@@ -122,6 +61,7 @@ export class CredentialService {
       {
         appId: appId,
         _id: id,
+        status: 'ACTIVE',
       },
       projection
     ).lean();
@@ -138,6 +78,98 @@ export class CredentialService {
         false
       );
     }
+
+    return credential;
+  }
+
+  async add(
+    appId: string,
+    userId: string,
+    { privateKeys, type, name }: AddCredential,
+    campaignApp: CampaignAppEncryption
+  ) {
+    const encryption = await getAppEncryptionKey({ campaignApp });
+    const doc = await CredentialModel.create({
+      appId: appId,
+      createdBy: userId,
+      name: name,
+      privateKeys: encryptDescryptJsonUsingKeyIv(privateKeys, encryption),
+      type: type,
+    });
+
+    const credential = doc.toObject();
+
+    credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+      credential.privateKeys,
+      encryption,
+      false
+    );
+
+    return credential;
+  }
+
+  async edit(
+    appId: string,
+    userId: string,
+    { id, name, privateKeys, type }: EditCredential,
+    campaignApp: CampaignAppEncryption
+  ) {
+    const encryption = await getAppEncryptionKey({ campaignApp });
+
+    const set: Partial<Credential> = {};
+
+    if (name) {
+      set.name = name;
+    }
+
+    if (type) {
+      set.type = type;
+    }
+
+    if (privateKeys) {
+      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
+    }
+
+    const credential = await CredentialModel.findOneAndUpdate(
+      {
+        appId: appId,
+        _id: id,
+        status: 'ACTIVE',
+      },
+      {
+        $set: set,
+      },
+      {
+        new: true,
+      }
+    ).lean();
+
+    if (!credential) {
+      return null;
+    }
+
+    credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+      credential.privateKeys,
+      encryption,
+      false
+    );
+
+    return credential;
+  }
+
+  async delete(appId: string, id: string) {
+    const credential = await CredentialModel.findOneAndUpdate(
+      {
+        appId: appId,
+        _id: id,
+        status: 'ACTIVE',
+      },
+      {
+        $set: {
+          status: 'DELETED',
+        },
+      }
+    ).lean();
 
     return credential;
   }

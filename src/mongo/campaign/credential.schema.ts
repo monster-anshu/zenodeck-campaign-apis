@@ -2,16 +2,15 @@ import { InferSchemaType, Schema } from 'mongoose';
 import { MONGO_CONNECTION } from '../connections';
 
 const CREDENTIAL_STATUS = ['ACTIVE', 'DELETED'] as const;
-export const CREDENTIAL_TYPES = [
-  'RESEND_API',
-  'AWS_SES',
-  'NODEMAILER',
-] as const;
+export const CREDENTIAL_TYPES = ['RESEND_API', 'SMTP'] as const;
 
-export const PrivateKeysSchema = new Schema({} as Record<string, string>, {
-  _id: false,
-  strict: false,
-});
+export const PrivateKeysSchema = new Schema(
+  {} as Record<string, string | number>,
+  {
+    _id: false,
+    strict: false,
+  }
+);
 
 const CredentialSchema = new Schema(
   {
