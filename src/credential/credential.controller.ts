@@ -13,8 +13,8 @@ import { AgentGuard } from '~/agent/agent.guard';
 import { CampaignApp } from '~/mongo/campaign';
 import { GetCampaignApp, GetSession } from '~/session/session.decorator';
 import { CredentialService } from './credential.service';
-import { AddCredentialDto } from './dto/add-credential.dto';
-import { EditCredentialDto } from './dto/edit-credential.dto';
+import { AddCredential, AddCredentialDto } from './dto/add-credential.dto';
+import { EditCredential, EditCredentialDto } from './dto/edit-credential.dto';
 
 @UseGuards(AgentGuard)
 @Controller('credential')
@@ -31,6 +31,24 @@ export class CredentialController {
     };
   }
 
+  @Get(':id')
+  async getById(
+    @GetSession('appId') appId: string,
+    @Param('id') id: string,
+    @GetCampaignApp() campaignApp: CampaignApp
+  ) {
+    const credential = await this.credentialService.getById(
+      appId,
+      id,
+      campaignApp
+    );
+
+    return {
+      isSuccess: true,
+      credential,
+    };
+  }
+
   @Post()
   async add(
     @Body() body: AddCredentialDto,
@@ -41,7 +59,7 @@ export class CredentialController {
     const credential = await this.credentialService.add(
       appId,
       userId,
-      body,
+      body as AddCredential,
       campaignApp
     );
 
@@ -61,7 +79,7 @@ export class CredentialController {
     const credential = await this.credentialService.edit(
       appId,
       userId,
-      body,
+      body as EditCredential,
       campaignApp
     );
 
@@ -75,12 +93,9 @@ export class CredentialController {
     };
   }
 
-  @Delete(':credentialId')
-  async delete(
-    @GetSession('appId') appId: string,
-    @Param('credentialId') credentialId: string
-  ) {
-    const credential = await this.credentialService.delete(appId, credentialId);
+  @Delete(':id')
+  async delete(@GetSession('appId') appId: string, @Param('id') id: string) {
+    const credential = await this.credentialService.delete(appId, id);
 
     if (!credential) {
       throw new NotFoundException();

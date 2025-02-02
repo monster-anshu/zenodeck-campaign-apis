@@ -6,8 +6,8 @@ import {
   Credential,
   CredentialModel,
 } from '~/mongo/campaign';
-import { AddCredentialDto } from './dto/add-credential.dto';
-import { EditCredentialDto } from './dto/edit-credential.dto';
+import { AddCredential } from './dto/add-credential.dto';
+import { EditCredential } from './dto/edit-credential.dto';
 
 @Injectable()
 export class CredentialService {
@@ -36,7 +36,7 @@ export class CredentialService {
   async add(
     appId: string,
     userId: string,
-    { privateKeys, type, name }: AddCredentialDto,
+    { privateKeys, type, name }: AddCredential,
     campaignApp: CampaignAppEncryption
   ) {
     const encryption = await getAppEncryptionKey({ campaignApp });
@@ -47,36 +47,44 @@ export class CredentialService {
       privateKeys: encryptDescryptJsonUsingKeyIv(privateKeys, encryption),
       type: type,
     });
-    const credential = doc.toObject() as Partial<Credential>;
-    delete credential.privateKeys;
+
+    const credential = doc.toObject();
+
+    credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+      privateKeys,
+      encryption,
+      false
+    );
+
     return credential;
   }
 
   async edit(
     appId: string,
     userId: string,
-    { id, name, privateKeys, type }: EditCredentialDto,
+    { id, name, privateKeys, type }: EditCredential,
     campaignApp: CampaignAppEncryption
   ) {
+    const encryption = await getAppEncryptionKey({ campaignApp });
+
     const set: Partial<Credential> = {};
 
     if (name) {
       set.name = name;
     }
 
-    if (privateKeys) {
-      const encryption = await getAppEncryptionKey({ campaignApp });
-      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
-    }
-
     if (type) {
       set.type = type;
+    }
+
+    if (privateKeys) {
+      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
     }
 
     const credential = await CredentialModel.findOneAndUpdate(
       {
         appId: appId,
-        id: id,
+        _id: id,
         status: 'ACTIVE',
       },
       {
@@ -85,9 +93,17 @@ export class CredentialService {
       {
         new: true,
       }
-    )
-      .select('-privateKeys')
-      .lean();
+    ).lean();
+
+    if (!credential) {
+      return null;
+    }
+
+    credential.privateKeys = encryptDescryptJsonUsingKeyIv(
+      credential.privateKeys,
+      encryption,
+      false
+    );
 
     return credential;
   }
@@ -96,7 +112,7 @@ export class CredentialService {
     const credential = await CredentialModel.findOneAndUpdate(
       {
         appId: appId,
-        id: id,
+        _id: id,
         status: 'ACTIVE',
       },
       {
@@ -122,6 +138,7 @@ export class CredentialService {
       {
         appId: appId,
         _id: id,
+        status: 'ACTIVE',
       },
       projection
     ).lean();

@@ -1,7 +1,7 @@
 import { decryptUsingKeyIv, encryptUsingKeyIv } from '.';
 import { Encryption } from '../campaign-app';
 
-type Data = { [key: string]: Data | string };
+type Data = { [key: string]: Data | string | number };
 
 export const encryptDescryptJsonUsingKeyIv = <T extends Data>(
   obj: T,
