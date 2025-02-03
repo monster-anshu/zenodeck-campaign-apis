@@ -3,6 +3,7 @@ import grapesjs from 'grapesjs';
 import juice from 'juice';
 import { CredentialService } from '~/credential/credential.service';
 import { CampaignAppEncryption, PrivateKeys } from '~/mongo/campaign';
+import { EmailHistoryModel } from '~/mongo/campaign/history.schema';
 import { SendMailDto } from './dto/send-mail.dto';
 
 @Injectable()
@@ -26,8 +27,15 @@ export class MailService {
     const payload = { ...body, html };
 
     if (credential.type === 'RESEND_API') {
-      return this.resendSend(payload, credential.privateKeys);
+      await this.resendSend(payload, credential.privateKeys);
     }
+
+    await EmailHistoryModel.create({
+      agentId: userId,
+      appId: appId,
+      html: html,
+      subject: body.subject,
+    });
   }
 
   async resendSend(

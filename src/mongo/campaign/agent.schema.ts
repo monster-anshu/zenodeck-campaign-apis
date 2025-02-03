@@ -13,11 +13,9 @@ const AgentSchema = new Schema(
     countryCode: {
       type: String,
     },
-
     firstName: {
       type: String,
     },
-
     invitedAt: {
       required: true,
       type: Date,
