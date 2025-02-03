@@ -10,6 +10,10 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: Types.ObjectId,
     },
+    credentialId: {
+      required: true,
+      type: Types.ObjectId,
+    },
     externalMessageId: String,
     from: {
       required: true,

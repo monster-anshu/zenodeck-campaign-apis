@@ -40,6 +40,7 @@ export class MailService {
     await EmailHistoryModel.create({
       agentId: userId,
       appId: appId,
+      credentialId: credential._id,
       externalMessageId: res,
       from: body.from,
       html: html,
