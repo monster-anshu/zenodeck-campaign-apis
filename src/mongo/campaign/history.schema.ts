@@ -10,11 +10,20 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: Types.ObjectId,
     },
+    externalMessageId: String,
+    from: {
+      required: true,
+      type: String,
+    },
     html: {
       required: true,
       type: String,
     },
     subject: {
+      required: true,
+      type: String,
+    },
+    to: {
       required: true,
       type: String,
     },
@@ -28,6 +37,6 @@ export const EmailHistorySchema = new Schema(
 export type EmailHistory = InferSchemaType<typeof EmailHistorySchema>;
 
 export const EmailHistoryModel = MONGO_CONNECTION.DEFAULT.model(
-  'email-history',
+  'emailHistory',
   EmailHistorySchema
 );

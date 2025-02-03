@@ -1,8 +1,9 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
+import nodemailer from 'nodemailer';
 import { CredentialService } from '~/credential/credential.service';
-import { ResendKey } from '~/credential/dto/add-credential.dto';
+import { ResendKey, SmtpKey } from '~/credential/dto/add-credential.dto';
 import { CampaignAppEncryption } from '~/mongo/campaign';
 import { EmailHistoryModel } from '~/mongo/campaign/history.schema';
 import { SendMailDto } from './dto/send-mail.dto';
@@ -27,16 +28,26 @@ export class MailService {
 
     const payload = { ...body, html };
 
+    let res;
     if (credential.type === 'RESEND_API') {
-      await this.resendSend(payload, credential.privateKeys as never);
+      res = await this.resendSend(payload, credential.privateKeys as never);
+    }
+
+    if (credential.type === 'SMTP') {
+      res = await this.smtpSend(payload, credential.privateKeys as never);
     }
 
     await EmailHistoryModel.create({
       agentId: userId,
       appId: appId,
+      externalMessageId: res,
+      from: body.from,
       html: html,
       subject: body.subject,
+      to: body.to,
     });
+
+    return res;
   }
 
   async resendSend(
@@ -70,7 +81,37 @@ export class MailService {
       throw new HttpException(json.message || 'SEND_MAIL_FAILED', res.status);
     }
 
-    return true;
+    return json.id as string;
+  }
+
+  async smtpSend(
+    {
+      html,
+      subject,
+      from,
+      to,
+    }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
+    privateKeys: SmtpKey['privateKeys']
+  ) {
+    const { host, password, port, username } = privateKeys;
+    const transporter = nodemailer.createTransport({
+      host: host,
+      port: port,
+      secure: false, // true for port 465, false for other ports
+      auth: {
+        user: username,
+        pass: password,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: from,
+      to: to,
+      subject: subject,
+      html: html, // html body
+    });
+
+    return info.messageId;
   }
 
   generateHTML(projectData: string | object) {
