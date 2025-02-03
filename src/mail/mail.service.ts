@@ -2,7 +2,8 @@ import { HttpException, Injectable } from '@nestjs/common';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
 import { CredentialService } from '~/credential/credential.service';
-import { CampaignAppEncryption, PrivateKeys } from '~/mongo/campaign';
+import { ResendKey } from '~/credential/dto/add-credential.dto';
+import { CampaignAppEncryption } from '~/mongo/campaign';
 import { EmailHistoryModel } from '~/mongo/campaign/history.schema';
 import { SendMailDto } from './dto/send-mail.dto';
 
@@ -27,7 +28,7 @@ export class MailService {
     const payload = { ...body, html };
 
     if (credential.type === 'RESEND_API') {
-      await this.resendSend(payload, credential.privateKeys);
+      await this.resendSend(payload, credential.privateKeys as never);
     }
 
     await EmailHistoryModel.create({
@@ -45,7 +46,7 @@ export class MailService {
       from,
       to,
     }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
-    privateKeys: PrivateKeys
+    privateKeys: ResendKey['privateKeys']
   ) {
     const apiKey = privateKeys.apiKey;
 
