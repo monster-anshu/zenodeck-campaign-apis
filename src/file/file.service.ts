@@ -10,7 +10,7 @@ export class FileService {
       appId,
       mimeType: body.mimeType,
       fileName: body.fileName || '',
-      module: body.module || '',
+      module: body.module,
     });
 
     if (!res) {

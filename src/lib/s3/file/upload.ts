@@ -30,12 +30,12 @@ export const getSignedUrl = async ({
   appId,
   mimeType,
   fileName,
-  module,
+  module = 'default',
 }: {
   appId: string;
   mimeType: string;
   fileName: string;
-  module: string;
+  module?: string;
 }) => {
   const finalMimeType = mimeTypeMap[mimeType] || mimeType;
   const ext = extensionFromPath(fileName) || extension(finalMimeType);
@@ -47,7 +47,6 @@ export const getSignedUrl = async ({
     throw new BadRequestException('INVALID_MIME_TYPE');
   }
 
-  module = module || 'default';
   const bucketSetting = moduleBucketMapping[module];
   if (!bucketSetting) {
     throw new BadRequestException('INVALID_MODULE');
