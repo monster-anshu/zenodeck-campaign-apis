@@ -6,8 +6,8 @@ import {
   Credential,
   CredentialModel,
 } from '~/mongo/campaign';
-import { AddCredential } from './dto/add-credential.dto';
-import { EditCredential } from './dto/edit-credential.dto';
+import { AddCredentialDto } from './dto/add-credential.dto';
+import { EditCredentialDto } from './dto/edit-credential.dto';
 
 @Injectable()
 export class CredentialService {
@@ -85,9 +85,10 @@ export class CredentialService {
   async add(
     appId: string,
     userId: string,
-    { privateKeys, type, name }: AddCredential,
+    { payload, name }: AddCredentialDto,
     campaignApp: CampaignAppEncryption
   ) {
+    const { privateKeys, type } = payload;
     const encryption = await getAppEncryptionKey({ campaignApp });
     const doc = await CredentialModel.create({
       appId: appId,
@@ -111,7 +112,7 @@ export class CredentialService {
   async edit(
     appId: string,
     userId: string,
-    { id, name, privateKeys, type }: EditCredential,
+    { id, name, payload }: EditCredentialDto,
     campaignApp: CampaignAppEncryption
   ) {
     const encryption = await getAppEncryptionKey({ campaignApp });
@@ -122,12 +123,12 @@ export class CredentialService {
       set.name = name;
     }
 
-    if (type) {
-      set.type = type;
-    }
-
-    if (privateKeys) {
-      set.privateKeys = encryptDescryptJsonUsingKeyIv(privateKeys, encryption);
+    if (payload) {
+      set.type = payload.type;
+      set.privateKeys = encryptDescryptJsonUsingKeyIv(
+        payload.privateKeys,
+        encryption
+      );
     }
 
     const credential = await CredentialModel.findOneAndUpdate(

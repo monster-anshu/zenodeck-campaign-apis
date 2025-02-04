@@ -14,8 +14,8 @@ import { AgentGuard } from '~/agent/agent.guard';
 import { CampaignApp } from '~/mongo/campaign';
 import { GetCampaignApp, GetSession } from '~/session/session.decorator';
 import { CredentialService } from './credential.service';
-import { AddCredential, AddCredentialDto } from './dto/add-credential.dto';
-import { EditCredential, EditCredentialDto } from './dto/edit-credential.dto';
+import { AddCredentialDto } from './dto/add-credential.dto';
+import { EditCredentialDto } from './dto/edit-credential.dto';
 
 @UseGuards(AgentGuard)
 @Controller('credential')
@@ -67,7 +67,7 @@ export class CredentialController {
     const credential = await this.credentialService.add(
       appId,
       userId,
-      body as AddCredential,
+      body,
       campaignApp
     );
 
@@ -87,7 +87,7 @@ export class CredentialController {
     const credential = await this.credentialService.edit(
       appId,
       userId,
-      body as EditCredential,
+      body,
       campaignApp
     );
 

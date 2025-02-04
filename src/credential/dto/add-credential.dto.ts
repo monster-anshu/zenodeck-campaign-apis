@@ -1,6 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { CREDENTIAL_TYPES } from '~/mongo/campaign';
 
 const ResendKeyZod = z.object({
   type: z.enum(['RESEND_API']),
@@ -21,14 +20,12 @@ const SmtpKeyZod = z.object({
 
 export const PrivateKeysZod = z.union([ResendKeyZod, SmtpKeyZod]);
 
-const AddCredentialZod = z
-  .object({
-    name: z.string().nonempty(),
-  })
-  .and(PrivateKeysZod);
+export const AddCredentialZod = z.object({
+  name: z.string().nonempty(),
+  payload: PrivateKeysZod,
+});
 
-export type AddCredential = z.infer<typeof AddCredentialZod>;
-export class AddCredentialDto extends createZodDto(AddCredentialZod as never) {}
+export class AddCredentialDto extends createZodDto(AddCredentialZod) {}
 
 export type ResendKey = z.infer<typeof ResendKeyZod>;
 export type SmtpKey = z.infer<typeof SmtpKeyZod>;
