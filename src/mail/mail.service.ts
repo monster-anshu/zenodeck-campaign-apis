@@ -57,10 +57,13 @@ export class MailService {
       subject,
       from,
       to,
+      name,
     }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
     privateKeys: ResendKey['privateKeys']
   ) {
     const apiKey = privateKeys.apiKey;
+
+    const emailFrom = name ? `${name} <${from}>` : from;
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -69,7 +72,7 @@ export class MailService {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: from,
+        from: emailFrom,
         to: Array.isArray(to) ? to : [to],
         subject: subject,
         html: html,
@@ -91,6 +94,7 @@ export class MailService {
       subject,
       from,
       to,
+      name,
     }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
     privateKeys: SmtpKey['privateKeys']
   ) {
@@ -105,8 +109,10 @@ export class MailService {
       },
     });
 
+    const emailFrom = name ? `${name} <${from}>` : from;
+
     const info = await transporter.sendMail({
-      from: from,
+      from: emailFrom,
       to: to,
       subject: subject,
       html: html, // html body

@@ -8,6 +8,10 @@ const SendMailZod = z.object({
   projectData: z.string(),
   from: z.string().email(),
   to: z.string().email(),
+  name: z
+    .string()
+    .regex(/^(?!.*[<>]).*$/)
+    .optional(),
 });
 
 export class SendMailDto extends createZodDto(SendMailZod) {}
