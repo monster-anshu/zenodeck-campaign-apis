@@ -6,6 +6,7 @@ import { CampaignAppModule } from '~/campaign-app/campaign-app.module';
 import { InternalModule } from '~/internal/internal.module';
 import { RoleModule } from '~/role/role.module';
 import { CredentialModule } from './credential/credential.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { FileModule } from './file/file.module';
 import { MailModule } from './mail/mail.module';
 
@@ -18,6 +19,7 @@ import { MailModule } from './mail/mail.module';
     CredentialModule,
     MailModule,
     FileModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
