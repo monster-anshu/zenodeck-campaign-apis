@@ -7,7 +7,7 @@ const SendMailZod = z.object({
   subject: z.string().nonempty(),
   projectData: z.string(),
   from: z.string().email(),
-  to: z.string().email(),
+  to: z.array(z.string().email()).or(z.string().email()),
   name: z
     .string()
     .regex(/^(?!.*[<>]).*$/)

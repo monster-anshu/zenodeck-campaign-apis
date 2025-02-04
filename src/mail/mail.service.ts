@@ -109,10 +109,13 @@ export class MailService {
       },
     });
 
-    const emailFrom = name ? `${name} <${from}>` : from;
-
     const info = await transporter.sendMail({
-      from: emailFrom,
+      from: name
+        ? {
+            name: name,
+            address: from,
+          }
+        : from,
       to: to,
       subject: subject,
       html: html, // html body
