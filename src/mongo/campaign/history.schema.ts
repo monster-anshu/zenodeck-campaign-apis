@@ -1,18 +1,18 @@
-import { InferSchemaType, Schema, Types } from 'mongoose';
+import { InferSchemaType, Schema } from 'mongoose';
 import { MONGO_CONNECTION } from '../connections';
 
 export const EmailHistorySchema = new Schema(
   {
     agentId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     appId: {
       required: true,
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     credentialId: {
       required: true,
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     externalMessageId: String,
     from: {

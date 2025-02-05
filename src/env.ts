@@ -4,6 +4,8 @@ export const PORT = +(process.env.PORT || 3000);
 export const STAGE = process.env.STAGE as string;
 
 export const CAMPAIGN_APP_API_KEY = process.env.CAMPAIGN_APP_API_KEY as string;
+export const CAMPAIGN_API_URL = process.env.CAMPAIGN_API_URL as string;
+
 export const MONGO_DEFAULT_URI = process.env.MONGO_DEFAULT_URI as string;
 export const MONGO_COMMON_URI = process.env.MONGO_COMMON_URI as string;
 
