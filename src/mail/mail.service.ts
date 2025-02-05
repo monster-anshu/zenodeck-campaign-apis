@@ -38,14 +38,14 @@ export class MailService {
     }
 
     const payloadWithHtml = (Array.isArray(to) ? to : [to]).map((to) => {
-      const html = this.generateHTML(projectData, to);
+      const { html, id } = this.generateHTML(projectData, to);
 
-      return { html, to };
+      return { html, to, id };
     });
 
-    const emailHistory: Partial<EmailHistory>[] = [];
+    const emailHistory: Partial<EmailHistory & { _id: Types.ObjectId }>[] = [];
 
-    const promises = payloadWithHtml.map(async ({ html, to }) => {
+    const promises = payloadWithHtml.map(async ({ html, to, id }) => {
       await transporter.send({
         from: from,
         html: html,
@@ -62,6 +62,7 @@ export class MailService {
         subject: subject,
         to: to,
         agentId: new Types.ObjectId(agen),
+        _id: id,
       });
     });
 
@@ -79,12 +80,15 @@ export class MailService {
       projectData: prasedData,
     });
 
+    const id = new Types.ObjectId();
+
     const trackingUrl = new URL(
       CAMPAIGN_API_URL + '/api/v1/campaign/public/track'
     );
 
     trackingUrl.searchParams.append('email', to);
     trackingUrl.searchParams.append('timestamp', Date.now() + '');
+    trackingUrl.searchParams.append('trackId', id.toString());
 
     let html = `<!DOCTYPE html>
             <html lang="en">
@@ -104,6 +108,6 @@ export class MailService {
 
     html = juice(html);
 
-    return html;
+    return { html, id };
   }
 }

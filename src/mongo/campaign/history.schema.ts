@@ -23,6 +23,7 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: String,
     },
+    isOpen: Boolean,
     subject: {
       required: true,
       type: String,

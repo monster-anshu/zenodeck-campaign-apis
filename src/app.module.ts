@@ -9,6 +9,7 @@ import { CredentialModule } from './credential/credential.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { FileModule } from './file/file.module';
 import { MailModule } from './mail/mail.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MailModule } from './mail/mail.module';
     MailModule,
     FileModule,
     DashboardModule,
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [AppService],
