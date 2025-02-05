@@ -1,10 +1,9 @@
 import { InferSchemaType, Schema } from 'mongoose';
-import { MONGO_CONNECTION } from '../connections';
 
 const AGENT_STATUS = ['INVITED', 'ACTIVE', 'DELETED'] as const;
 
 // data of agent
-const AgentSchema = new Schema(
+export const AgentSchema = new Schema(
   {
     appId: {
       required: true,
@@ -53,8 +52,4 @@ const AgentSchema = new Schema(
 AgentSchema.index({ appId: 1, userId: 1 }, { unique: true });
 
 export type Agent = InferSchemaType<typeof AgentSchema>;
-
-export const AgentModel = MONGO_CONNECTION.DEFAULT.model<Agent>(
-  'agent',
-  AgentSchema
-);
+export const AgentSchemaName = 'agent';

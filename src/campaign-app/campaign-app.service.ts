@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectionType } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, ProjectionType } from 'mongoose';
 import { encrypt } from '~/lib/crypto';
 import { randomString } from '~/lib/random';
-import { CampaignApp, CampaignAppModel } from '~/mongo/campaign';
+import { CampaignApp, CampaignAppSchemaName } from '~/mongo/campaign';
 import CompanyProductModel from '~/mongo/common/schema/CompanyProduct';
+import { ConnectionName } from '~/mongo/connections';
 
 @Injectable()
 export class CampaignAppService {
+  constructor(
+    @InjectModel(CampaignAppSchemaName, ConnectionName.DEFAULT)
+    private campaignAppModel: Model<CampaignApp>
+  ) {}
+
   async createDefault({
     companyId,
     companyName,
@@ -15,9 +22,11 @@ export class CampaignAppService {
     companyName: string;
   }) {
     const [campaignApp, productInfo] = await Promise.all([
-      CampaignAppModel.findOne({
-        companyId,
-      }).lean(),
+      this.campaignAppModel
+        .findOne({
+          companyId,
+        })
+        .lean(),
       CompanyProductModel.findOne({
         companyId,
         productId: 'CAMPAIGN',
@@ -29,7 +38,7 @@ export class CampaignAppService {
       return null;
     }
 
-    const company = await CampaignAppModel.create({
+    const company = await this.campaignAppModel.create({
       companyId,
       companyProductId: productInfo._id,
       status: 'ACTIVE',
@@ -61,23 +70,27 @@ export class CampaignAppService {
       ...additionalProjection,
     };
     if (appId) {
-      campiagnAppInfo = await CampaignAppModel.findOne(
-        {
-          _id: appId,
-          companyId,
-          status: 'ACTIVE',
-        },
-        projection
-      ).lean();
+      campiagnAppInfo = await this.campaignAppModel
+        .findOne(
+          {
+            _id: appId,
+            companyId,
+            status: 'ACTIVE',
+          },
+          projection
+        )
+        .lean();
     }
     if (!campiagnAppInfo) {
-      campiagnAppInfo = await CampaignAppModel.findOne(
-        {
-          companyId,
-          status: 'ACTIVE',
-        },
-        projection
-      ).lean();
+      campiagnAppInfo = await this.campaignAppModel
+        .findOne(
+          {
+            companyId,
+            status: 'ACTIVE',
+          },
+          projection
+        )
+        .lean();
     }
     return campiagnAppInfo;
   }

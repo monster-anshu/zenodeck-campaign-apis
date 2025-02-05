@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Agent, AgentDetails, AgentModel } from '~/mongo/campaign';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Agent, AgentDetails, AgentSchemaName } from '~/mongo/campaign';
 import UserModel from '~/mongo/common/schema/User';
 import { User } from '~/mongo/common/types';
+import { ConnectionName } from '~/mongo/connections';
 import { RoleService } from '~/role/role.service';
 
 @Injectable()
@@ -23,7 +26,11 @@ export class AgentService {
     userId: 1,
   };
 
-  constructor(private readonly roleService: RoleService) {}
+  constructor(
+    private readonly roleService: RoleService,
+    @InjectModel(AgentSchemaName, ConnectionName.DEFAULT)
+    private agentModel: Model<Agent>
+  ) {}
 
   async createAgents({
     appId,
@@ -37,7 +44,7 @@ export class AgentService {
       },
     }).lean();
     const agents = users.map((user) => {
-      return new AgentModel({
+      return new this.agentModel({
         appId: appId,
         roleId: roleId,
         userId: user._id,
@@ -49,7 +56,7 @@ export class AgentService {
         timezone: user.timezone,
       });
     });
-    const createdAgents = await AgentModel.insertMany(agents);
+    const createdAgents = await this.agentModel.insertMany(agents);
     return createdAgents || [];
   }
 
@@ -84,11 +91,12 @@ export class AgentService {
           countryCode: 1,
         }
       ).lean(),
-      AgentModel.findOne({
-        appId,
-        userId,
-        status: isInvited ? 'INVITED' : 'ACTIVE',
-      })
+      this.agentModel
+        .findOne({
+          appId,
+          userId,
+          status: isInvited ? 'INVITED' : 'ACTIVE',
+        })
         .select(AgentService.AgentSelectFields)
         .lean(),
     ]);
@@ -97,7 +105,7 @@ export class AgentService {
       return null;
     }
 
-    const userDet = this.getFormattedUserInfo({
+    const userDet = this.format({
       adminInfo,
       agentInfo,
       decrypted,
@@ -109,7 +117,7 @@ export class AgentService {
     return { ...userDet, role };
   }
 
-  private getFormattedUserInfo({
+  private format({
     adminInfo,
     agentInfo,
     // decrypted = false,

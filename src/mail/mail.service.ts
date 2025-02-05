@@ -1,20 +1,26 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CredentialService } from '~/credential/credential.service';
 import { CAMPAIGN_API_URL } from '~/env';
-import { CampaignAppEncryption } from '~/mongo/campaign';
 import {
+  CampaignAppEncryption,
   EmailHistory,
-  EmailHistoryModel,
-} from '~/mongo/campaign/history.schema';
+  EmailHistorySchemaName,
+} from '~/mongo/campaign';
+import { ConnectionName } from '~/mongo/connections';
 import { TransporterFactory } from '~/transporter/transporter';
 import { SendMailDto } from './dto/send-mail.dto';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly credentialService: CredentialService) {}
+  constructor(
+    private readonly credentialService: CredentialService,
+    @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
+    private emailHistoryModel: Model<EmailHistory>
+  ) {}
 
   async send(
     appId: string,
@@ -68,7 +74,7 @@ export class MailService {
 
     await Promise.all(promises);
 
-    await EmailHistoryModel.insertMany(emailHistory);
+    await this.emailHistoryModel.insertMany(emailHistory);
   }
 
   private generateHTML(projectData: string | object, to: string) {

@@ -1,5 +1,4 @@
 import { InferSchemaType, Schema } from 'mongoose';
-import { MONGO_CONNECTION } from '../connections';
 
 export const EmailHistorySchema = new Schema(
   {
@@ -40,8 +39,4 @@ export const EmailHistorySchema = new Schema(
 );
 
 export type EmailHistory = InferSchemaType<typeof EmailHistorySchema>;
-
-export const EmailHistoryModel = MONGO_CONNECTION.DEFAULT.model(
-  'emailHistory',
-  EmailHistorySchema
-);
+export const EmailHistorySchemaName = 'emailHistory';

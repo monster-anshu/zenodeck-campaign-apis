@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { getAppEncryptionKey } from '~/lib/campaign-app';
 import { encryptDescryptJsonUsingKeyIv } from '~/lib/crypto/json';
 import {
   CampaignAppEncryption,
   Credential,
-  CredentialModel,
+  CredentialSchemaName,
 } from '~/mongo/campaign';
+import { ConnectionName } from '~/mongo/connections';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
@@ -21,18 +24,25 @@ export class CredentialService {
     updatedAt: 1,
   };
 
+  constructor(
+    @InjectModel(CredentialSchemaName, ConnectionName.DEFAULT)
+    private credentialModel: Model<Credential>
+  ) {}
+
   async list(appId: string, campaignApp?: CampaignAppEncryption | null) {
     const projection = campaignApp
       ? { ...CredentialService.BasicProjection, privateKeys: 1 }
       : CredentialService.BasicProjection;
 
-    const credentials = await CredentialModel.find(
-      {
-        appId: appId,
-        status: 'ACTIVE',
-      },
-      projection
-    ).lean();
+    const credentials = await this.credentialModel
+      .find(
+        {
+          appId: appId,
+          status: 'ACTIVE',
+        },
+        projection
+      )
+      .lean();
 
     if (campaignApp) {
       const encryption = await getAppEncryptionKey({ campaignApp });
@@ -57,14 +67,16 @@ export class CredentialService {
       ? { ...CredentialService.BasicProjection, privateKeys: 1 }
       : CredentialService.BasicProjection;
 
-    const credential = await CredentialModel.findOne(
-      {
-        appId: appId,
-        _id: id,
-        status: 'ACTIVE',
-      },
-      projection
-    ).lean();
+    const credential = await this.credentialModel
+      .findOne(
+        {
+          appId: appId,
+          _id: id,
+          status: 'ACTIVE',
+        },
+        projection
+      )
+      .lean();
 
     if (!credential) {
       throw new NotFoundException('CREDENTIAL_NOT_FOUND');
@@ -90,7 +102,7 @@ export class CredentialService {
   ) {
     const { privateKeys, type } = payload;
     const encryption = await getAppEncryptionKey({ campaignApp });
-    const doc = await CredentialModel.create({
+    const doc = await this.credentialModel.create({
       appId: appId,
       createdBy: userId,
       name: name,
@@ -131,19 +143,21 @@ export class CredentialService {
       );
     }
 
-    const credential = await CredentialModel.findOneAndUpdate(
-      {
-        appId: appId,
-        _id: id,
-        status: 'ACTIVE',
-      },
-      {
-        $set: set,
-      },
-      {
-        new: true,
-      }
-    ).lean();
+    const credential = await this.credentialModel
+      .findOneAndUpdate(
+        {
+          appId: appId,
+          _id: id,
+          status: 'ACTIVE',
+        },
+        {
+          $set: set,
+        },
+        {
+          new: true,
+        }
+      )
+      .lean();
 
     if (!credential) {
       return null;
@@ -159,18 +173,20 @@ export class CredentialService {
   }
 
   async delete(appId: string, id: string) {
-    const credential = await CredentialModel.findOneAndUpdate(
-      {
-        appId: appId,
-        _id: id,
-        status: 'ACTIVE',
-      },
-      {
-        $set: {
-          status: 'DELETED',
+    const credential = await this.credentialModel
+      .findOneAndUpdate(
+        {
+          appId: appId,
+          _id: id,
+          status: 'ACTIVE',
         },
-      }
-    ).lean();
+        {
+          $set: {
+            status: 'DELETED',
+          },
+        }
+      )
+      .lean();
 
     return credential;
   }

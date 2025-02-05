@@ -1,5 +1,4 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { EmailHistoryModel } from '~/mongo/campaign';
 import { PublicService } from './public.service';
 
 @Controller('public')

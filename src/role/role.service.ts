@@ -1,15 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
-import { Role, RoleModel } from '~/mongo/campaign';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Role, RoleSchemaName } from '~/mongo/campaign';
+import { ConnectionName } from '~/mongo/connections';
 
 @Injectable()
 export class RoleService {
+  constructor(
+    @InjectModel(RoleSchemaName, ConnectionName.DEFAULT)
+    private roleModel: Model<Role>
+  ) {}
+
   async createDefault(appId: string, userId: string) {
-    const data = await RoleModel.findOne({
-      appId,
-      isAutoCreated: true,
-      isSuperAdminRole: true,
-    }).lean();
+    const data = await this.roleModel
+      .findOne({
+        appId,
+        isAutoCreated: true,
+        isSuperAdminRole: true,
+      })
+      .lean();
 
     if (data?._id) {
       return data._id.toString();
@@ -38,7 +47,7 @@ export class RoleService {
     ];
     let superAdminRole;
     for (const role of roles) {
-      const document = await RoleModel.create(role);
+      const document = await this.roleModel.create(role);
       if (document.isSuperAdminRole) {
         superAdminRole = document;
       }
@@ -47,10 +56,12 @@ export class RoleService {
   }
 
   async getById(appId: string, roleId: string) {
-    const role = await RoleModel.findOne({
-      _id: roleId,
-      appId: appId,
-    }).lean();
+    const role = await this.roleModel
+      .findOne({
+        _id: roleId,
+        appId: appId,
+      })
+      .lean();
 
     return role;
   }

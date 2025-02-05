@@ -1,5 +1,4 @@
 import { InferSchemaType, Schema } from 'mongoose';
-import { MONGO_CONNECTION } from '../connections';
 
 export const Actions = [
   'CREATE',
@@ -31,7 +30,7 @@ const PermissionSchema = new Schema<Permission>(
 );
 
 // roles
-const RoleSchema = new Schema(
+export const RoleSchema = new Schema(
   {
     name: {
       type: String,
@@ -73,7 +72,4 @@ export type Role = InferSchemaType<typeof RoleSchema>;
 export type SubjectType = (typeof Subjects)[number];
 export type ActionType = (typeof Actions)[number];
 
-export const RoleModel = MONGO_CONNECTION.DEFAULT.model<Role>(
-  'role',
-  RoleSchema
-);
+export const RoleSchemaName = 'role';

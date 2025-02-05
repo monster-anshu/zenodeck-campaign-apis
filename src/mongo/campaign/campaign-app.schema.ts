@@ -35,7 +35,7 @@ export const BrandingSchema = new Schema(
 );
 
 // Company details
-const CampaignAppSchema = new Schema(
+export const CampaignAppSchema = new Schema(
   {
     branding: { type: BrandingSchema, required: true },
     companyId: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -57,8 +57,4 @@ export type CampaignApp = InferSchemaType<typeof CampaignAppSchema> & {
   _id: Types.ObjectId;
 };
 export type CampaignAppEncryption = Pick<CampaignApp, 'encryption'>;
-
-export const CampaignAppModel = MONGO_CONNECTION.DEFAULT.model<CampaignApp>(
-  'campaignApp',
-  CampaignAppSchema
-);
+export const CampaignAppSchemaName = 'campaignApp';
