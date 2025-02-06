@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import dayjs from '~/lib/dayjs';
-import { EmailHistoryModel } from '~/mongo/campaign';
+import { EmailHistory, EmailHistorySchemaName } from '~/mongo/campaign';
+import { ConnectionName } from '~/mongo/connections';
 
 @Injectable()
 export class DashboardService {
+  constructor(
+    @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
+    private emailHistoryModel: Model<EmailHistory>
+  ) {}
+
   async get(appId: string) {
     const [history] = await Promise.all([this.history(appId)]);
     return { history };
@@ -14,7 +21,7 @@ export class DashboardService {
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
 
-    const last7DaysPromise = EmailHistoryModel.aggregate<{
+    const last7DaysPromise = this.emailHistoryModel.aggregate<{
       _id: string;
       count: number;
     }>([
@@ -46,7 +53,7 @@ export class DashboardService {
     const last24Hours = new Date(Date.now() - oneDayMs);
 
     // Get the last 24 hours' email count
-    const last24HoursCountPromise = EmailHistoryModel.countDocuments({
+    const last24HoursCountPromise = this.emailHistoryModel.countDocuments({
       appId: new Types.ObjectId(appId),
       createdAt: { $gte: last24Hours },
     });

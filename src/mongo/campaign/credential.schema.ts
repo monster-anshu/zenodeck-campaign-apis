@@ -1,5 +1,4 @@
 import { InferSchemaType, Schema } from 'mongoose';
-import { MONGO_CONNECTION } from '../connections';
 
 const CREDENTIAL_STATUS = ['ACTIVE', 'DELETED'] as const;
 export const CREDENTIAL_TYPES = ['RESEND_API', 'SMTP'] as const;
@@ -12,7 +11,7 @@ export const PrivateKeysSchema = new Schema(
   }
 );
 
-const CredentialSchema = new Schema(
+export const CredentialSchema = new Schema(
   {
     appId: {
       required: true,
@@ -47,7 +46,9 @@ export type Credential = InferSchemaType<typeof CredentialSchema>;
 export type PrivateKeys = InferSchemaType<typeof PrivateKeysSchema>;
 export type CredentialType = (typeof CREDENTIAL_TYPES)[number];
 
-export const CredentialModel = MONGO_CONNECTION.DEFAULT.model<Credential>(
-  'credential',
-  CredentialSchema
-);
+export const CredentialSchemaName = 'credential';
+
+// export const CredentialModel = MONGO_CONNECTION.DEFAULT.model<Credential>(
+//   'credential',
+//   CredentialSchema
+// );

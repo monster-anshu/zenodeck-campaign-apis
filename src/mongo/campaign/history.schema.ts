@@ -1,18 +1,17 @@
-import { InferSchemaType, Schema, Types } from 'mongoose';
-import { MONGO_CONNECTION } from '../connections';
+import { InferSchemaType, Schema } from 'mongoose';
 
 export const EmailHistorySchema = new Schema(
   {
     agentId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     appId: {
       required: true,
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     credentialId: {
       required: true,
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     externalMessageId: String,
     from: {
@@ -23,6 +22,7 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: String,
     },
+    isOpen: Boolean,
     subject: {
       required: true,
       type: String,
@@ -39,8 +39,4 @@ export const EmailHistorySchema = new Schema(
 );
 
 export type EmailHistory = InferSchemaType<typeof EmailHistorySchema>;
-
-export const EmailHistoryModel = MONGO_CONNECTION.DEFAULT.model(
-  'emailHistory',
-  EmailHistorySchema
-);
+export const EmailHistorySchemaName = 'emailHistory';

@@ -1,21 +1,31 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
-import nodemailer from 'nodemailer';
+import { Model, Types } from 'mongoose';
 import { CredentialService } from '~/credential/credential.service';
-import { ResendKey, SmtpKey } from '~/credential/dto/add-credential.dto';
-import { CampaignAppEncryption } from '~/mongo/campaign';
-import { EmailHistoryModel } from '~/mongo/campaign/history.schema';
+import { CAMPAIGN_API_URL } from '~/env';
+import {
+  CampaignAppEncryption,
+  EmailHistory,
+  EmailHistorySchemaName,
+} from '~/mongo/campaign';
+import { ConnectionName } from '~/mongo/connections';
+import { TransporterFactory } from '~/transporter/transporter';
 import { SendMailDto } from './dto/send-mail.dto';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly credentialService: CredentialService) {}
+  constructor(
+    private readonly credentialService: CredentialService,
+    @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
+    private emailHistoryModel: Model<EmailHistory>
+  ) {}
 
   async send(
     appId: string,
-    userId: string,
-    { credentialId, projectData, ...body }: SendMailDto,
+    agen: string,
+    { credentialId, projectData, to, from, subject, name }: SendMailDto,
     campaignApp: CampaignAppEncryption
   ) {
     const credential = await this.credentialService.getById(
@@ -24,107 +34,50 @@ export class MailService {
       campaignApp
     );
 
-    const html = this.generateHTML(projectData);
-
-    const payload = { ...body, html };
-
-    let res;
-    if (credential.type === 'RESEND_API') {
-      res = await this.resendSend(payload, credential.privateKeys as never);
-    }
-
-    if (credential.type === 'SMTP') {
-      res = await this.smtpSend(payload, credential.privateKeys as never);
-    }
-
-    await EmailHistoryModel.create({
-      agentId: userId,
-      appId: appId,
-      credentialId: credential._id,
-      externalMessageId: res,
-      from: body.from,
-      html: html,
-      subject: body.subject,
-      to: body.to,
+    const transporter = TransporterFactory.create({
+      privateKeys: credential.privateKeys as never,
+      type: credential.type,
     });
 
-    return res;
-  }
+    if (!transporter) {
+      throw new BadRequestException('UNABLE_TO_CREATE_TRANSPORTER');
+    }
 
-  async resendSend(
-    {
-      html,
-      subject,
-      from,
-      to,
-      name,
-    }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
-    privateKeys: ResendKey['privateKeys']
-  ) {
-    const apiKey = privateKeys.apiKey;
+    const payloadWithHtml = (Array.isArray(to) ? to : [to]).map((to) => {
+      const { html, id } = this.generateHTML(projectData, to);
 
-    const emailFrom = name ? `${name} <${from}>` : from;
+      return { html, to, id };
+    });
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: emailFrom,
-        to: Array.isArray(to) ? to : [to],
-        subject: subject,
+    const emailHistory: Partial<EmailHistory & { _id: Types.ObjectId }>[] = [];
+
+    const promises = payloadWithHtml.map(async ({ html, to, id }) => {
+      await transporter.send({
+        from: from,
         html: html,
-      }),
+        subject: subject,
+        to: to,
+        name: name,
+      });
+
+      emailHistory.push({
+        appId: new Types.ObjectId(appId),
+        credentialId: credential._id,
+        from: from,
+        html: html,
+        subject: subject,
+        to: to,
+        agentId: new Types.ObjectId(agen),
+        _id: id,
+      });
     });
 
-    const json = await res.json();
+    await Promise.all(promises);
 
-    if (!res.ok || res.status !== 200) {
-      throw new HttpException(json.message || 'SEND_MAIL_FAILED', res.status);
-    }
-
-    return json.id as string;
+    await this.emailHistoryModel.insertMany(emailHistory);
   }
 
-  async smtpSend(
-    {
-      html,
-      subject,
-      from,
-      to,
-      name,
-    }: Omit<SendMailDto, 'credentialId' | 'projectData'> & { html: string },
-    privateKeys: SmtpKey['privateKeys']
-  ) {
-    const { host, password, port, username } = privateKeys;
-    const transporter = nodemailer.createTransport({
-      host: host,
-      port: port,
-      secure: false, // true for port 465, false for other ports
-      auth: {
-        user: username,
-        pass: password,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: name
-        ? {
-            name: name,
-            address: from,
-          }
-        : from,
-      to: to,
-      subject: subject,
-      html: html, // html body
-    });
-
-    return info.messageId;
-  }
-
-  generateHTML(projectData: string | object) {
+  private generateHTML(projectData: string | object, to: string) {
     const prasedData =
       typeof projectData === 'string' ? JSON.parse(projectData) : projectData;
 
@@ -132,6 +85,16 @@ export class MailService {
       headless: true,
       projectData: prasedData,
     });
+
+    const id = new Types.ObjectId();
+
+    const trackingUrl = new URL(
+      CAMPAIGN_API_URL + '/api/v1/campaign/public/track'
+    );
+
+    trackingUrl.searchParams.append('email', to);
+    trackingUrl.searchParams.append('timestamp', Date.now() + '');
+    trackingUrl.searchParams.append('trackId', id.toString());
 
     let html = `<!DOCTYPE html>
             <html lang="en">
@@ -143,12 +106,14 @@ export class MailService {
                 </style>
               </head>
               <body>
+                <!-- Tracking Pixel -->
+                <img src="${trackingUrl}" width="1" height="1" style="display:none;" />
                 ${editor.getHtml()}
               </body>
             </html>`;
 
     html = juice(html);
 
-    return html;
+    return { html, id };
   }
 }

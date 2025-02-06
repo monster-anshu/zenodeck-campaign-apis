@@ -10,7 +10,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { Types } from 'mongoose';
 import { S3_HOST } from '~/env';
-import { CampaignAppModel, FileModel, FileType } from '~/mongo/campaign';
+import { FileModel, FileType } from '~/mongo/campaign';
+import { CampaignAppModel } from '../campaign-app';
 import { S3_BUCKETS } from './folders';
 
 export interface FileMeta {
