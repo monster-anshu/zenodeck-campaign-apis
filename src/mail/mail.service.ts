@@ -1,16 +1,11 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { CredentialService } from '~/credential/credential.service';
 import { CAMPAIGN_API_URL } from '~/env';
-import {
-  CampaignAppEncryption,
-  EmailHistory,
-  EmailHistorySchemaName,
-} from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { HistoryService } from '~/history/history.service';
+import { CampaignAppEncryption, History } from '~/mongo/campaign';
 import { TransporterFactory } from '~/transporter/transporter';
 import { SendMailDto } from './dto/send-mail.dto';
 
@@ -18,8 +13,7 @@ import { SendMailDto } from './dto/send-mail.dto';
 export class MailService {
   constructor(
     private readonly credentialService: CredentialService,
-    @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
-    private emailHistoryModel: Model<EmailHistory>
+    private readonly historyService: HistoryService
   ) {}
 
   async send(
@@ -49,7 +43,9 @@ export class MailService {
       return { html, to, id };
     });
 
-    const emailHistory: Partial<EmailHistory & { _id: Types.ObjectId }>[] = [];
+    const history: (Omit<History, 'createdAt' | 'updatedAt'> & {
+      _id: Types.ObjectId;
+    })[] = [];
 
     const promises = payloadWithHtml.map(async ({ html, to, id }) => {
       await transporter.send({
@@ -60,7 +56,7 @@ export class MailService {
         name: name,
       });
 
-      emailHistory.push({
+      history.push({
         appId: new Types.ObjectId(appId),
         credentialId: credential._id,
         from: from,
@@ -69,12 +65,12 @@ export class MailService {
         to: to,
         agentId: new Types.ObjectId(agen),
         _id: id,
+        ctr: [] as never,
       });
     });
 
     await Promise.all(promises);
-
-    await this.emailHistoryModel.insertMany(emailHistory);
+    await this.historyService.create(history);
   }
 
   private generateHTML(projectData: string | object, to: string) {

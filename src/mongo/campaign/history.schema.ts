@@ -1,6 +1,22 @@
 import { InferSchemaType, Schema } from 'mongoose';
 
-export const EmailHistorySchema = new Schema(
+const CtrSchema = new Schema(
+  {
+    time: {
+      required: true,
+      type: Date,
+    },
+    url: {
+      required: true,
+      type: String,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+export const HistorySchema = new Schema(
   {
     agentId: {
       type: Schema.Types.ObjectId,
@@ -13,7 +29,7 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: Schema.Types.ObjectId,
     },
-    externalMessageId: String,
+    ctr: [CtrSchema],
     from: {
       required: true,
       type: String,
@@ -22,7 +38,7 @@ export const EmailHistorySchema = new Schema(
       required: true,
       type: String,
     },
-    isOpen: Boolean,
+    lastSeenAt: Date,
     subject: {
       required: true,
       type: String,
@@ -38,5 +54,5 @@ export const EmailHistorySchema = new Schema(
   }
 );
 
-export type EmailHistory = InferSchemaType<typeof EmailHistorySchema>;
-export const EmailHistorySchemaName = 'emailHistory';
+export type History = InferSchemaType<typeof HistorySchema>;
+export const HistorySchemaName = 'history';
