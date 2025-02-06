@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { CredentialService } from '~/credential/credential.service';
 import dayjs from '~/lib/dayjs';
 import { EmailHistory, EmailHistorySchemaName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
@@ -9,12 +10,16 @@ import { ConnectionName } from '~/mongo/connections';
 export class DashboardService {
   constructor(
     @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
-    private emailHistoryModel: Model<EmailHistory>
+    private emailHistoryModel: Model<EmailHistory>,
+    private readonly credentialService: CredentialService
   ) {}
 
   async get(appId: string) {
-    const [history] = await Promise.all([this.history(appId)]);
-    return { history };
+    const [history, credentialCount] = await Promise.all([
+      this.history(appId),
+      this.credentialService.count(appId),
+    ]);
+    return { history, credentialCount };
   }
 
   async history(appId: string) {
