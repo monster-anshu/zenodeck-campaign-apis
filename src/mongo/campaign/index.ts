@@ -4,7 +4,7 @@ import { Role } from './role.schema';
 export * from './agent.schema';
 export * from './campaign-app.schema';
 export * from './credential.schema';
-export * from './ctr.schema';
+export * from './event.schema';
 export * from './file.schema';
 export * from './history.schema';
 export * from './role.schema';

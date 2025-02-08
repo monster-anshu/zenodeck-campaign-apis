@@ -65,7 +65,6 @@ export class MailService {
         to: to,
         agentId: new Types.ObjectId(agen),
         _id: id,
-        ctr: [] as never,
       });
     });
 

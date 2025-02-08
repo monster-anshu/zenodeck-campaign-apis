@@ -4,7 +4,7 @@ import { HistorySchema, HistorySchemaName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
 import { HistoryService } from './history.service';
 
-export const HistoryFeature = MongooseModule.forFeature(
+const HistoryFeature = MongooseModule.forFeature(
   [{ name: HistorySchemaName, schema: HistorySchema }],
   ConnectionName.DEFAULT
 );

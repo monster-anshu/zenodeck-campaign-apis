@@ -12,6 +12,16 @@ export class HistoryService {
     private readonly historyModel: Model<History>
   ) {}
 
+  async getById(historyId: string) {
+    const history = await this.historyModel
+      .findOne({
+        _id: new Types.ObjectId(historyId),
+      })
+      .lean();
+
+    return history;
+  }
+
   async create(
     history:
       | Omit<History, 'createdAt' | 'updatedAt'>
