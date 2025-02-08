@@ -56,6 +56,9 @@ export class PublicService {
           historyId: history._id,
           url: url,
         },
+      },
+      {
+        upsert: true,
       }
     );
   }

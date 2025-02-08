@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { PublicService } from './public.service';
 
@@ -20,19 +20,20 @@ export class PublicController {
 
   @Get('redirect')
   async redirect(
-    @Req() res: FastifyReply,
-    @Query('emailId') emailId?: string,
+    @Res() res: FastifyReply,
+    @Query('email') email?: string,
     @Query('trackId') trackId?: string,
     @Query('next') next?: string
   ) {
+    debugger;
     if (!next) {
       return;
     }
-    if (!trackId || !emailId) {
-      res.redirect(next);
+    if (!trackId || !email) {
+      res.status(HttpStatus.TEMPORARY_REDIRECT).redirect(next);
       return;
     }
     await this.publicService.ctr(trackId, next);
-    res.redirect(next);
+    res.status(HttpStatus.TEMPORARY_REDIRECT).redirect(next);
   }
 }
