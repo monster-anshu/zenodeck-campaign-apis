@@ -10,6 +10,7 @@ import { CredentialModule } from './credential/credential.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { MONGO_COMMON_URI, MONGO_DEFAULT_URI } from './env';
 import { FileModule } from './file/file.module';
+import { HistoryModule } from './history/history.module';
 import { MailModule } from './mail/mail.module';
 import { ConnectionName } from './mongo/connections';
 import { PublicModule } from './public/public.module';
@@ -31,6 +32,7 @@ import { PublicModule } from './public/public.module';
     FileModule,
     DashboardModule,
     PublicModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

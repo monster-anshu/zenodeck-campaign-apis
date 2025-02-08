@@ -1,16 +1,11 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { CredentialService } from '~/credential/credential.service';
 import { CAMPAIGN_API_URL } from '~/env';
-import {
-  CampaignAppEncryption,
-  EmailHistory,
-  EmailHistorySchemaName,
-} from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { HistoryService } from '~/history/history.service';
+import { CampaignAppEncryption, History } from '~/mongo/campaign';
 import { TransporterFactory } from '~/transporter/transporter';
 import { SendMailDto } from './dto/send-mail.dto';
 
@@ -18,8 +13,7 @@ import { SendMailDto } from './dto/send-mail.dto';
 export class MailService {
   constructor(
     private readonly credentialService: CredentialService,
-    @InjectModel(EmailHistorySchemaName, ConnectionName.DEFAULT)
-    private emailHistoryModel: Model<EmailHistory>
+    private readonly historyService: HistoryService
   ) {}
 
   async send(
@@ -49,7 +43,9 @@ export class MailService {
       return { html, to, id };
     });
 
-    const emailHistory: Partial<EmailHistory & { _id: Types.ObjectId }>[] = [];
+    const history: (Omit<History, 'createdAt' | 'updatedAt'> & {
+      _id: Types.ObjectId;
+    })[] = [];
 
     const promises = payloadWithHtml.map(async ({ html, to, id }) => {
       await transporter.send({
@@ -60,7 +56,7 @@ export class MailService {
         name: name,
       });
 
-      emailHistory.push({
+      history.push({
         appId: new Types.ObjectId(appId),
         credentialId: credential._id,
         from: from,
@@ -69,12 +65,12 @@ export class MailService {
         to: to,
         agentId: new Types.ObjectId(agen),
         _id: id,
+        ctr: [] as never,
       });
     });
 
     await Promise.all(promises);
-
-    await this.emailHistoryModel.insertMany(emailHistory);
+    await this.historyService.create(history);
   }
 
   private generateHTML(projectData: string | object, to: string) {
@@ -93,8 +89,25 @@ export class MailService {
     );
 
     trackingUrl.searchParams.append('email', to);
-    trackingUrl.searchParams.append('timestamp', Date.now() + '');
     trackingUrl.searchParams.append('trackId', id.toString());
+
+    const body = editor.getHtml({
+      cleanId: true,
+      attributes(component, attr) {
+        if (component.get('type') === 'link') {
+          const url = createUrl(attr['href']);
+          if (typeof url === 'string') {
+            return attr;
+          }
+          url.searchParams.append('email', to);
+          url.searchParams.append('trackId', id.toString());
+          attr['href'] = url.toString();
+        }
+        return attr;
+      },
+    });
+
+    const css = editor.getCss();
 
     let html = `<!DOCTYPE html>
             <html lang="en">
@@ -102,18 +115,32 @@ export class MailService {
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <style>
-                  ${editor.getCss()}
+                  ${css}
                 </style>
               </head>
-              <body>
-                <!-- Tracking Pixel -->
-                <img src="${trackingUrl}" width="1" height="1" style="display:none;" />
-                ${editor.getHtml()}
-              </body>
+              <!-- Tracking Pixel -->
+              <img src="${trackingUrl}" width="1" height="1" style="display:none;" />
+              ${body}
             </html>`;
 
     html = juice(html);
 
     return { html, id };
+  }
+}
+
+function createUrl(url: string) {
+  try {
+    if (!url) {
+      return url;
+    }
+    new URL(url);
+    const redirectUrl = new URL(
+      `${CAMPAIGN_API_URL}/api/v1/campaign/public/redirect`
+    );
+    redirectUrl.searchParams.append('next', url);
+    return redirectUrl;
+  } catch {
+    return url;
   }
 }

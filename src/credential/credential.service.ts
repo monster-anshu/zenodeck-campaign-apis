@@ -190,4 +190,12 @@ export class CredentialService {
 
     return credential;
   }
+
+  async count(appId: string) {
+    const count = await this.credentialModel.countDocuments({
+      appId: appId,
+      status: 'ACTIVE',
+    });
+    return count;
+  }
 }

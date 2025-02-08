@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ProjectionType } from 'mongoose';
+import { Model, ProjectionType, Types } from 'mongoose';
 import { encrypt } from '~/lib/crypto';
 import { randomString } from '~/lib/random';
 import { CampaignApp, CampaignAppSchemaName } from '~/mongo/campaign';
@@ -93,5 +93,16 @@ export class CampaignAppService {
         .lean();
     }
     return campiagnAppInfo;
+  }
+
+  async getById(appId: string) {
+    const campiagnApp = await this.campaignAppModel
+      .findOne({
+        _id: appId,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    return campiagnApp;
   }
 }
