@@ -1,65 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { HistoryService } from '~/history/history.service';
 import {
-  Ctr,
-  CtrSchemaName,
-  History,
-  HistorySchemaName,
-} from '~/mongo/campaign';
+  EmailEvent,
+  EmailLinkClick,
+  EmailOpenEvent,
+} from '~/mongo/campaign/event.schema';
 
 import { ConnectionName } from '~/mongo/connections';
 
 @Injectable()
 export class PublicService {
   constructor(
-    @InjectModel(HistorySchemaName, ConnectionName.DEFAULT)
-    private readonly historyModel: Model<History>,
-    @InjectModel(CtrSchemaName, ConnectionName.DEFAULT)
-    private readonly ctrModel: Model<Ctr>
+    private readonly historyService: HistoryService,
+    @InjectModel(EmailEvent.OPEN, ConnectionName.DEFAULT)
+    private readonly emailOpenModel: Model<EmailOpenEvent>,
+    @InjectModel(EmailEvent.CLICK, ConnectionName.DEFAULT)
+    private readonly emailClickModel: Model<EmailLinkClick>
   ) {}
 
   async track(trackId: string) {
-    await this.historyModel.updateOne(
-      {
-        _id: trackId,
-      },
-      {
-        $set: {
-          lastSeenAt: new Date(),
-        },
-      }
-    );
-  }
-
-  async ctr(trackId: string, url: string) {
-    const history = await this.historyModel
-      .findOne({
-        _id: trackId,
-      })
-      .lean();
+    const history = await this.historyService.getById(trackId);
 
     if (!history) {
       return;
     }
 
-    await this.ctrModel.updateOne(
+    await this.emailOpenModel.insertMany([
       {
+        appId: history.appId,
+        count: 1,
+        historyId: history._id,
+      },
+    ]);
+  }
+
+  async ctr(trackId: string, url: string) {
+    const history = await this.historyService.getById(trackId);
+
+    if (!history) {
+      return;
+    }
+
+    await this.emailClickModel.insertMany([
+      {
+        appId: history.appId,
+        count: 1,
         historyId: history._id,
         url: url,
       },
-      {
-        $inc: {
-          clicks: 1,
-        },
-        $setOnInsert: {
-          historyId: history._id,
-          url: url,
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
+    ]);
   }
 }

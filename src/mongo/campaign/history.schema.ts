@@ -1,21 +1,5 @@
 import { InferSchemaType, Schema } from 'mongoose';
 
-const CtrSchema = new Schema(
-  {
-    time: {
-      required: true,
-      type: Date,
-    },
-    url: {
-      required: true,
-      type: String,
-    },
-  },
-  {
-    _id: false,
-  }
-);
-
 export const HistorySchema = new Schema(
   {
     agentId: {
@@ -29,7 +13,6 @@ export const HistorySchema = new Schema(
       required: true,
       type: Schema.Types.ObjectId,
     },
-    ctr: [CtrSchema],
     from: {
       required: true,
       type: String,
@@ -38,7 +21,6 @@ export const HistorySchema = new Schema(
       required: true,
       type: String,
     },
-    lastSeenAt: Date,
     subject: {
       required: true,
       type: String,
