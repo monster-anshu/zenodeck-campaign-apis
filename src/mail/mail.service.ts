@@ -89,8 +89,25 @@ export class MailService {
     );
 
     trackingUrl.searchParams.append('email', to);
-    trackingUrl.searchParams.append('timestamp', Date.now() + '');
     trackingUrl.searchParams.append('trackId', id.toString());
+
+    const body = editor.getHtml({
+      cleanId: true,
+      attributes(component, attr) {
+        if (component.get('type') === 'link') {
+          const url = createUrl(attr['href']);
+          if (typeof url === 'string') {
+            return attr;
+          }
+          url.searchParams.append('email', to);
+          url.searchParams.append('trackId', id.toString());
+          attr['href'] = url.toString();
+        }
+        return attr;
+      },
+    });
+
+    const css = editor.getCss();
 
     let html = `<!DOCTYPE html>
             <html lang="en">
@@ -98,18 +115,32 @@ export class MailService {
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <style>
-                  ${editor.getCss()}
+                  ${css}
                 </style>
               </head>
-              <body>
-                <!-- Tracking Pixel -->
-                <img src="${trackingUrl}" width="1" height="1" style="display:none;" />
-                ${editor.getHtml()}
-              </body>
+              <!-- Tracking Pixel -->
+              <img src="${trackingUrl}" width="1" height="1" style="display:none;" />
+              ${body}
             </html>`;
 
     html = juice(html);
 
     return { html, id };
+  }
+}
+
+function createUrl(url: string) {
+  try {
+    if (!url) {
+      return url;
+    }
+    new URL(url);
+    const redirectUrl = new URL(
+      `${CAMPAIGN_API_URL}/api/v1/campaign/public/redirect`
+    );
+    redirectUrl.searchParams.append('next', url);
+    return redirectUrl;
+  } catch {
+    return url;
   }
 }
