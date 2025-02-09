@@ -12,7 +12,7 @@ import { ConnectionName } from '~/mongo/connections';
 import { PublicController } from './public.controller';
 import { PublicService } from './public.service';
 
-const EmailEventFeature = MongooseModule.forFeature(
+export const EmailEventFeature = MongooseModule.forFeature(
   [
     {
       name: EmailEventSchemaName,

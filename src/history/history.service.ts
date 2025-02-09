@@ -45,7 +45,7 @@ export class HistoryService {
       {
         $match: {
           appId: new Types.ObjectId(appId),
-          createdAt: { $gte: start }, // Get emails from the last 7 days
+          createdAt: { $gte: start, $lte: end },
         },
       },
       {
@@ -84,7 +84,7 @@ export class HistoryService {
       });
 
       total += currCount;
-      date = date.add(1, 'day');
+      date = date.add(oneDayMs, 'millisecond');
     }
 
     return { stats: filledStats, total };
