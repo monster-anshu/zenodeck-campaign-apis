@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { GetSession } from '~/session/session.decorator';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
@@ -7,6 +7,19 @@ import { LeadsListService } from './lead-list.service';
 @Controller('leads')
 export class LeadListController {
   constructor(private readonly leadListService: LeadsListService) {}
+
+  @Get()
+  async list(
+    @GetSession('appId') appId: string,
+    @GetSession('userId') userId: string
+  ) {
+    const leadLists = await this.leadListService.list(appId);
+
+    return {
+      isSuccess: true,
+      leadLists,
+    };
+  }
 
   @Post()
   async create(

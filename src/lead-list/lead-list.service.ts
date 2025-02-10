@@ -15,6 +15,17 @@ export class LeadsListService {
     private readonly leadModel: Model<Lead>
   ) {}
 
+  async list(appId: string) {
+    const leadLists = await this.leadListModel
+      .find({
+        appId: appId,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    return leadLists;
+  }
+
   async create(
     appId: string,
     userId: string,
@@ -53,6 +64,7 @@ export class LeadsListService {
       .findOne({
         appId: appId,
         _id: leadListId,
+        status: 'ACTIVE',
       })
       .lean();
 
