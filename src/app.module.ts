@@ -4,16 +4,17 @@ import { AgentModule } from '~/agent/agent.module';
 import { AppController } from '~/app.controller';
 import { AppService } from '~/app.service';
 import { CampaignAppModule } from '~/campaign-app/campaign-app.module';
+import { CredentialModule } from '~/credential/credential.module';
+import { DashboardModule } from '~/dashboard/dashboard.module';
+import { MONGO_DEFAULT_URI } from '~/env';
+import { FileModule } from '~/file/file.module';
+import { HistoryModule } from '~/history/history.module';
 import { InternalModule } from '~/internal/internal.module';
+import { LeadListModule } from '~/lead-list/lead-list.module';
+import { MailModule } from '~/mail/mail.module';
+import { ConnectionName } from '~/mongo/connections';
+import { PublicModule } from '~/public/public.module';
 import { RoleModule } from '~/role/role.module';
-import { CredentialModule } from './credential/credential.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { MONGO_COMMON_URI, MONGO_DEFAULT_URI } from './env';
-import { FileModule } from './file/file.module';
-import { HistoryModule } from './history/history.module';
-import { MailModule } from './mail/mail.module';
-import { ConnectionName } from './mongo/connections';
-import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PublicModule } from './public/public.module';
     DashboardModule,
     PublicModule,
     HistoryModule,
+    LeadListModule,
   ],
   controllers: [AppController],
   providers: [AppService],
