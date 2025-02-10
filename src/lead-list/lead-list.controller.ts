@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { GetSession } from '~/session/session.decorator';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
@@ -42,6 +42,15 @@ export class LeadListController {
     @Body() body: ImportLeadDto
   ) {
     await this.leadListService.import(appId, userId, body);
+    return {
+      isSuccess: true,
+    };
+  }
+
+  @Delete(':id')
+  async remove(@GetSession('appId') appId: string, @Param('id') id: string) {
+    await this.leadListService.remove(appId, id);
+
     return {
       isSuccess: true,
     };

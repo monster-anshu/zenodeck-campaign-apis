@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Lead, LeadList, LeadListName, LeadSchemaName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
@@ -74,12 +74,36 @@ export class LeadsListService {
 
     const bulkOps = leads.map((lead) => ({
       updateOne: {
-        filter: { email: lead.email },
+        filter: { email: lead.email, leadListId: leadList._id },
         update: { $set: lead },
         upsert: true,
       },
     }));
 
     await this.leadModel.bulkWrite(bulkOps);
+  }
+
+  async remove(appId: string, leadListId: string) {
+    const leadList = await this.leadListModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(leadListId),
+          appId: appId,
+          status: 'ACTIVE',
+        },
+        {
+          $set: {
+            status: 'DELETED',
+          },
+        },
+        {
+          new: true,
+        }
+      )
+      .lean();
+
+    if (!leadList) {
+      throw new NotFoundException('LEAD_LIST_NOT_FOUND');
+    }
   }
 }
