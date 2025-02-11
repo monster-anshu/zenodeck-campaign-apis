@@ -1,9 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { AgentGuard } from '~/agent/agent.guard';
 import { GetSession } from '~/session/session.decorator';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
 import { LeadsListService } from './lead-list.service';
 
+@UseGuards(AgentGuard)
 @Controller('leads')
 export class LeadListController {
   constructor(private readonly leadListService: LeadsListService) {}

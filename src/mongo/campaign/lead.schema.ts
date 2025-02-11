@@ -30,7 +30,7 @@ const LeadSchema = new Schema(
   }
 );
 
-LeadSchema.index({ appId: 1, email: 1 }, { unique: true });
+LeadSchema.index({ leadListId: 1, email: 1 }, { unique: true });
 
 const LeadSchemaName = 'lead';
 type Lead = InferSchemaType<typeof LeadSchema>;
