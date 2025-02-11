@@ -15,6 +15,7 @@ import { MailModule } from '~/mail/mail.module';
 import { ConnectionName } from '~/mongo/connections';
 import { PublicModule } from '~/public/public.module';
 import { RoleModule } from '~/role/role.module';
+import { LeadModule } from './lead/lead.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RoleModule } from '~/role/role.module';
     PublicModule,
     HistoryModule,
     LeadListModule,
+    LeadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

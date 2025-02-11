@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Lead, LeadList, LeadListName, LeadSchemaName } from '~/mongo/campaign';
+import { LeadService } from '~/lead/lead.service';
+import { LeadList, LeadListName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
@@ -10,10 +11,9 @@ import { UpadteLeadListDto } from './dto/update-lead-list.dto';
 @Injectable()
 export class LeadsListService {
   constructor(
+    private readonly leadService: LeadService,
     @InjectModel(LeadListName, ConnectionName.DEFAULT)
-    private readonly leadListModel: Model<LeadList>,
-    @InjectModel(LeadSchemaName, ConnectionName.DEFAULT)
-    private readonly leadModel: Model<Lead>
+    private readonly leadListModel: Model<LeadList>
   ) {}
 
   async list(appId: string) {
@@ -41,11 +41,11 @@ export class LeadsListService {
     await leadList.save();
 
     if (leads.length) {
-      await this.leadModel.insertMany(
+      await this.leadService.insert(
         leads.map((lead) => {
           return {
             ...lead,
-            appId: appId,
+            appId: new Types.ObjectId(appId),
             status: 'ACTIVE',
             leadListId: leadList._id,
           };
@@ -73,15 +73,7 @@ export class LeadsListService {
       throw new NotFoundException('LEAD_LIST_NOT_FOUND');
     }
 
-    const bulkOps = leads.map((lead) => ({
-      updateOne: {
-        filter: { email: lead.email, leadListId: leadList._id },
-        update: { $set: lead },
-        upsert: true,
-      },
-    }));
-
-    await this.leadModel.bulkWrite(bulkOps);
+    await this.leadService.add(leadList._id.toString(), leads);
   }
 
   async remove(appId: string, leadListId: string) {
