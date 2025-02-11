@@ -5,6 +5,7 @@ import { Lead, LeadList, LeadListName, LeadSchemaName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
+import { UpadteLeadListDto } from './dto/update-lead-list.dto';
 
 @Injectable()
 export class LeadsListService {
@@ -105,5 +106,31 @@ export class LeadsListService {
     if (!leadList) {
       throw new NotFoundException('LEAD_LIST_NOT_FOUND');
     }
+  }
+
+  async update(appId: string, userId: string, { id, name }: UpadteLeadListDto) {
+    const leadList = await this.leadListModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          appId: appId,
+          status: 'ACTIVE',
+        },
+        {
+          $set: {
+            name,
+          },
+        },
+        {
+          new: true,
+        }
+      )
+      .lean();
+
+    if (!leadList) {
+      throw new NotFoundException('LEAD_LIST_NOT_FOUND');
+    }
+
+    return leadList;
   }
 }

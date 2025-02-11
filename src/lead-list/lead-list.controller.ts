@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { AgentGuard } from '~/agent/agent.guard';
 import { GetSession } from '~/session/session.decorator';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
+import { UpadteLeadListDto } from './dto/update-lead-list.dto';
 import { LeadsListService } from './lead-list.service';
 
 @UseGuards(AgentGuard)
@@ -63,6 +65,20 @@ export class LeadListController {
 
     return {
       isSuccess: true,
+    };
+  }
+
+  @Patch()
+  async update(
+    @GetSession('appId') appId: string,
+    @GetSession('userId') userId: string,
+    @Body() body: UpadteLeadListDto
+  ) {
+    const leadList = await this.leadListService.update(appId, userId, body);
+
+    return {
+      isSuccess: true,
+      leadList,
     };
   }
 }
