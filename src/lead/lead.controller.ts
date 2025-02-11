@@ -1,4 +1,11 @@
-import { Body, Controller, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { AgentGuard } from '~/agent/agent.guard';
 import { GetSession } from '~/session/session.decorator';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -20,6 +27,18 @@ export class LeadController {
     return {
       isSuccess: true,
       lead,
+    };
+  }
+
+  @Delete(':id')
+  async remove(
+    @GetSession('appId') appId: string,
+    @GetSession('userId') userId: string,
+    @Param('id') id: string
+  ) {
+    await this.leadService.remove(appId, id);
+    return {
+      isSuccess: true,
     };
   }
 }

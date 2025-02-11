@@ -67,4 +67,30 @@ export class LeadService {
 
     return lead;
   }
+
+  async remove(appId: string, id: string) {
+    const lead = await this.leadModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          appId: appId,
+          status: 'ACTIVE',
+        },
+        {
+          $set: {
+            status: 'DELETED',
+          },
+        },
+        {
+          new: true,
+        }
+      )
+      .lean();
+
+    if (!lead) {
+      throw new NotFoundException('LEAD_NOT_FOUND');
+    }
+
+    return lead;
+  }
 }
