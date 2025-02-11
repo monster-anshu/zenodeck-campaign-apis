@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   UseGuards,
@@ -15,6 +16,19 @@ import { LeadService } from './lead.service';
 @Controller('lead')
 export class LeadController {
   constructor(private readonly leadService: LeadService) {}
+
+  @Get(':leadListId')
+  async list(
+    @GetSession('appId') appId: string,
+    @Param('leadListId') leadListId: string
+  ) {
+    const leads = await this.leadService.list(appId, leadListId);
+
+    return {
+      isSuccess: true,
+      leads,
+    };
+  }
 
   @Patch()
   async update(

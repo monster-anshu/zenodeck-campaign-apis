@@ -13,6 +13,18 @@ export class LeadService {
     private readonly leadModel: Model<Lead>
   ) {}
 
+  async list(appId: string, leadListId: string) {
+    const leads = await this.leadModel
+      .find({
+        appId: appId,
+        leadListId: leadListId,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    return leads;
+  }
+
   async insert(
     lead:
       | Omit<Lead, 'updatedAt' | 'createdAt'>
