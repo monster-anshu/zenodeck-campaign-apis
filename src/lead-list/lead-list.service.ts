@@ -41,16 +41,7 @@ export class LeadsListService {
     await leadList.save();
 
     if (leads.length) {
-      await this.leadService.insert(
-        leads.map((lead) => {
-          return {
-            ...lead,
-            appId: new Types.ObjectId(appId),
-            status: 'ACTIVE',
-            leadListId: leadList._id,
-          };
-        })
-      );
+      await this.leadService.add(appId, leadList._id.toString(), leads);
     }
 
     return leadList.toObject();
@@ -73,7 +64,7 @@ export class LeadsListService {
       throw new NotFoundException('LEAD_LIST_NOT_FOUND');
     }
 
-    await this.leadService.add(leadList._id.toString(), leads);
+    await this.leadService.add(appId, leadList._id.toString(), leads);
   }
 
   async remove(appId: string, leadListId: string) {

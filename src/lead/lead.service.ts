@@ -25,23 +25,14 @@ export class LeadService {
     return leads;
   }
 
-  async insert(
-    lead:
-      | Omit<Lead, 'updatedAt' | 'createdAt'>
-      | Omit<Lead, 'updatedAt' | 'createdAt'>[]
-  ) {
-    lead = Array.isArray(lead) ? lead : [lead];
-    const result = await this.leadModel.insertMany(lead);
-    return result;
-  }
-
-  async add(leadListId: string, leads: ImportLeadDto['leads']) {
+  async add(appId: string, leadListId: string, leads: ImportLeadDto['leads']) {
     leads = Array.isArray(leads) ? leads : [leads];
 
     const bulkOps = leads.map((lead) => ({
       updateOne: {
         filter: {
           email: lead.email,
+          appId: appId,
           leadListId: leadListId,
           status: 'ACTIVE',
         },
