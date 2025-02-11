@@ -16,7 +16,7 @@ import { UpadteLeadListDto } from './dto/update-lead-list.dto';
 import { LeadsListService } from './lead-list.service';
 
 @UseGuards(AgentGuard)
-@Controller('leads')
+@Controller('lead-list')
 export class LeadListController {
   constructor(private readonly leadListService: LeadsListService) {}
 
