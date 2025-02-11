@@ -18,7 +18,7 @@ export class MailService {
 
   async send(
     appId: string,
-    agen: string,
+    userId: string,
     { credentialId, projectData, to, from, subject, name }: SendMailDto,
     campaignApp: CampaignAppEncryption
   ) {
@@ -63,7 +63,6 @@ export class MailService {
         html: html,
         subject: subject,
         to: to,
-        agentId: new Types.ObjectId(agen),
         _id: id,
       });
     });

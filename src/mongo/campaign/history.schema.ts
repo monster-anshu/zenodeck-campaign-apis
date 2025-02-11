@@ -2,9 +2,6 @@ import { InferSchemaType, Schema } from 'mongoose';
 
 export const HistorySchema = new Schema(
   {
-    agentId: {
-      type: Schema.Types.ObjectId,
-    },
     appId: {
       required: true,
       type: Schema.Types.ObjectId,

@@ -7,6 +7,8 @@ export * from './credential.schema';
 export * from './event.schema';
 export * from './file.schema';
 export * from './history.schema';
+export * from './lead.schema';
+export * from './list-list.schema';
 export * from './role.schema';
 
 export interface AgentDetails extends Agent {
