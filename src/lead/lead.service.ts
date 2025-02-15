@@ -14,7 +14,11 @@ export class LeadService {
     private readonly leadModel: Model<Lead>
   ) {}
 
-  async list(appId: string, leadListId: string, { limit, after }: ListLeadDto) {
+  async list(
+    appId: string,
+    leadListId: string,
+    { limit, after, q }: ListLeadDto
+  ) {
     let filter: FilterQuery<Lead> = {};
 
     if (after) {
@@ -27,6 +31,15 @@ export class LeadService {
       leadListId: leadListId,
       status: 'ACTIVE',
     };
+
+    if (q) {
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapes regex special characters
+      filter.$or = [
+        { firstName: { $regex: escapedQ, $options: 'i' } },
+        { lastName: { $regex: escapedQ, $options: 'i' } },
+        { email: { $regex: escapedQ, $options: 'i' } },
+      ];
+    }
 
     const leads = await this.leadModel
       .find(filter)

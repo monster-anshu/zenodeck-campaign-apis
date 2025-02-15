@@ -5,6 +5,7 @@ import { MongoIdZod } from '~/lib/zod';
 export const ListLeadZod = z.object({
   after: MongoIdZod.optional(),
   limit: z.coerce.number().max(100).min(1).default(10),
+  q: z.string().optional(),
 });
 
 export class ListLeadDto extends createZodDto(ListLeadZod) {}
