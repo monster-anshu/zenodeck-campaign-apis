@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { ImportLeadDto } from '~/lead-list/dto/import-lead-list.dto';
 import { Lead, LeadSchemaName } from '~/mongo/campaign';
 import { ConnectionName } from '~/mongo/connections';
+import { ListLeadDto } from './dto/list-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 
 @Injectable()
@@ -13,13 +14,37 @@ export class LeadService {
     private readonly leadModel: Model<Lead>
   ) {}
 
-  async list(appId: string, leadListId: string) {
+  async list(
+    appId: string,
+    leadListId: string,
+    { limit, after, q }: ListLeadDto
+  ) {
+    let filter: FilterQuery<Lead> = {};
+
+    if (after) {
+      filter._id = { $lt: new Types.ObjectId(after) };
+    }
+
+    filter = {
+      ...filter,
+      appId: appId,
+      leadListId: leadListId,
+      status: 'ACTIVE',
+    };
+
+    if (q) {
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapes regex special characters
+      filter.$or = [
+        { firstName: { $regex: escapedQ, $options: 'i' } },
+        { lastName: { $regex: escapedQ, $options: 'i' } },
+        { email: { $regex: escapedQ, $options: 'i' } },
+      ];
+    }
+
     const leads = await this.leadModel
-      .find({
-        appId: appId,
-        leadListId: leadListId,
-        status: 'ACTIVE',
-      })
+      .find(filter)
+      .sort({ _id: -1 })
+      .limit(limit)
       .lean();
 
     return leads;

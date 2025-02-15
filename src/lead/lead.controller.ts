@@ -5,10 +5,12 @@ import {
   Get,
   Param,
   Patch,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AgentGuard } from '~/agent/agent.guard';
 import { GetSession } from '~/session/session.decorator';
+import { ListLeadDto } from './dto/list-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadService } from './lead.service';
 
@@ -20,13 +22,26 @@ export class LeadController {
   @Get(':leadListId')
   async list(
     @GetSession('appId') appId: string,
-    @Param('leadListId') leadListId: string
+    @Param('leadListId') leadListId: string,
+    @Query() query: ListLeadDto
   ) {
-    const leads = await this.leadService.list(appId, leadListId);
+    const leads = await this.leadService.list(appId, leadListId, {
+      ...query,
+      limit: query.limit + 1,
+    });
+
+    const slicedLeads = leads.slice(0, query.limit);
+
+    const meta = {
+      limit: query.limit,
+      nextCursor:
+        leads.length > query.limit ? slicedLeads.at(-1)?._id || null : null,
+    };
 
     return {
       isSuccess: true,
-      leads,
+      meta: meta,
+      leads: slicedLeads,
     };
   }
 
