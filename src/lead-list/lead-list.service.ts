@@ -116,4 +116,20 @@ export class LeadsListService {
 
     return leadList;
   }
+
+  async getById(appId: string, id: string) {
+    const leadList = await this.leadListModel
+      .findOne({
+        _id: id,
+        appId: appId,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    if (!leadList) {
+      throw new NotFoundException('LEAD_LIST_NOT_FOUND');
+    }
+
+    return leadList;
+  }
 }

@@ -33,6 +33,16 @@ export class LeadListController {
     };
   }
 
+  @Get(':id')
+  async getById(@GetSession('appId') appId: string, @Param('id') id: string) {
+    const leadList = await this.leadListService.getById(appId, id);
+
+    return {
+      isSuccess: true,
+      leadList,
+    };
+  }
+
   @Post()
   async create(
     @GetSession('appId') appId: string,
