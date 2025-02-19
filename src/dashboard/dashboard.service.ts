@@ -85,9 +85,9 @@ export class DashboardService {
     const oneDayMs = 60 * 60 * 24 * 1000;
 
     let total = 0;
-    let date = dayjs(start);
+    let date = dayjs(end);
 
-    while (date.toDate().valueOf() < end.valueOf()) {
+    while (date.toDate().valueOf() > start.valueOf()) {
       const formattedDate = date.format('YYYY-MM-DD');
       const currCount = dateMap.get(formattedDate) ?? 0;
 
@@ -97,10 +97,10 @@ export class DashboardService {
       });
 
       total += currCount;
-      date = date.add(oneDayMs, 'millisecond');
+      date = date.subtract(oneDayMs, 'millisecond');
     }
 
-    return { stats: filledStats, total };
+    return { stats: filledStats.reverse(), total };
   }
 
   async getOpened(appId: string) {
@@ -145,9 +145,9 @@ export class DashboardService {
     const oneDayMs = 60 * 60 * 24 * 1000;
 
     let total = 0;
-    let date = dayjs(start);
+    let date = dayjs(end);
 
-    while (date.toDate().valueOf() < end.valueOf()) {
+    while (date.toDate().valueOf() > start.valueOf()) {
       const formattedDate = date.format('YYYY-MM-DD');
       const currCount = dateMap.get(formattedDate) ?? 0;
 
@@ -157,9 +157,9 @@ export class DashboardService {
       });
 
       total += currCount;
-      date = date.add(oneDayMs, 'millisecond');
+      date = date.subtract(oneDayMs, 'millisecond');
     }
 
-    return { stats: filledStats, total };
+    return { stats: filledStats.reverse(), total };
   }
 }
