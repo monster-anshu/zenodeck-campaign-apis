@@ -5,6 +5,7 @@ import { Types } from 'mongoose';
 import { CredentialService } from '~/credential/credential.service';
 import { CAMPAIGN_API_URL } from '~/env';
 import { HistoryService } from '~/history/history.service';
+import { LeadService } from '~/lead/lead.service';
 import { CampaignAppEncryption, History } from '~/mongo/campaign';
 import { TransporterFactory } from '~/transporter/transporter';
 import { SendMailDto } from './dto/send-mail.dto';
@@ -13,13 +14,22 @@ import { SendMailDto } from './dto/send-mail.dto';
 export class MailService {
   constructor(
     private readonly credentialService: CredentialService,
-    private readonly historyService: HistoryService
+    private readonly historyService: HistoryService,
+    private readonly leadsService: LeadService
   ) {}
 
   async send(
     appId: string,
     userId: string,
-    { credentialId, projectData, to, from, subject, name }: SendMailDto,
+    {
+      credentialId,
+      projectData,
+      to,
+      from,
+      subject,
+      name,
+      leadListId,
+    }: SendMailDto,
     campaignApp: CampaignAppEncryption
   ) {
     const credential = await this.credentialService.getById(
@@ -37,7 +47,20 @@ export class MailService {
       throw new BadRequestException('UNABLE_TO_CREATE_TRANSPORTER');
     }
 
-    const payloadWithHtml = (Array.isArray(to) ? to : [to]).map((to) => {
+    let target: string[] = [];
+
+    if (leadListId) {
+      const leads = await this.leadsService.list(appId, leadListId, {
+        limit: 10,
+      });
+      target = leads.map((lead) => lead.email);
+    }
+
+    if (to) {
+      target = Array.isArray(to) ? to : [to];
+    }
+
+    const payloadWithHtml = target.map((to) => {
       const { html, id } = this.generateHTML(projectData, to);
 
       return { html, to, id };
