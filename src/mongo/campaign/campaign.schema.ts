@@ -27,4 +27,4 @@ export const CampaignSchema = new Schema(
 );
 
 export type Campaign = InferSchemaType<typeof CampaignSchema>;
-export const CampaignSchemaName = 'campi';
+export const CampaignSchemaName = 'campaign';
