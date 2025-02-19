@@ -4,6 +4,7 @@ import { AgentModule } from '~/agent/agent.module';
 import { AppController } from '~/app.controller';
 import { AppService } from '~/app.service';
 import { CampaignAppModule } from '~/campaign-app/campaign-app.module';
+import { CampaignModule } from '~/campaign/campaign.module';
 import { CredentialModule } from '~/credential/credential.module';
 import { DashboardModule } from '~/dashboard/dashboard.module';
 import { MONGO_DEFAULT_URI } from '~/env';
@@ -37,6 +38,7 @@ import { LeadModule } from './lead/lead.module';
     HistoryModule,
     LeadListModule,
     LeadModule,
+    CampaignModule,
   ],
   controllers: [AppController],
   providers: [AppService],
