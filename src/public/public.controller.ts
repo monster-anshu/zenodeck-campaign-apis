@@ -8,10 +8,10 @@ export class PublicController {
 
   @Get('track')
   async track(
-    @Query('emailId') emailId?: string,
+    @Query('email') email?: string,
     @Query('trackId') trackId?: string
   ) {
-    if (!trackId || !emailId) {
+    if (!trackId || !email) {
       return;
     }
 

@@ -64,13 +64,13 @@ export class CampaignAppService {
     companyId: string;
     projection?: Record<string, number>;
   }) {
-    let campiagnAppInfo;
+    let campaignAppInfo;
     const projection: ProjectionType<CampaignApp> = {
       branding: 1,
       ...additionalProjection,
     };
     if (appId) {
-      campiagnAppInfo = await this.campaignAppModel
+      campaignAppInfo = await this.campaignAppModel
         .findOne(
           {
             _id: appId,
@@ -81,8 +81,8 @@ export class CampaignAppService {
         )
         .lean();
     }
-    if (!campiagnAppInfo) {
-      campiagnAppInfo = await this.campaignAppModel
+    if (!campaignAppInfo) {
+      campaignAppInfo = await this.campaignAppModel
         .findOne(
           {
             companyId,
@@ -92,17 +92,17 @@ export class CampaignAppService {
         )
         .lean();
     }
-    return campiagnAppInfo;
+    return campaignAppInfo;
   }
 
   async getById(appId: string) {
-    const campiagnApp = await this.campaignAppModel
+    const campaignApp = await this.campaignAppModel
       .findOne({
         _id: appId,
         status: 'ACTIVE',
       })
       .lean();
 
-    return campiagnApp;
+    return campaignApp;
   }
 }
