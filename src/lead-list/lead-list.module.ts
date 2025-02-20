@@ -15,5 +15,6 @@ const LeadListFeature = MongooseModule.forFeature(
   imports: [LeadListFeature, LeadModule],
   providers: [LeadsListService],
   controllers: [LeadListController],
+  exports: [LeadsListService],
 })
 export class LeadListModule {}
