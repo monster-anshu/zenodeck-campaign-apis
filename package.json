@@ -7,13 +7,15 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "env": "ln .env $PWD/services/apis/.env",
     "format": "prettier --write .",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "sls": "STAGE=dev serverless campaign-apis offline",
+    "start": "nest start",
+    "start:debug": "nest start --debug --watch",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/src/main"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.740.0",
@@ -43,6 +45,7 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.2",
     "@nestjs/schematics": "^11.0.0",
+    "@serverless/typescript": "^3.38.0",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.12.0",
     "@types/nodemailer": "^6.4.17",
@@ -54,6 +57,12 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "serverless": "^4.6.3",
+    "serverless-deployment-bucket": "^1.6.0",
+    "serverless-offline": "^14.4.0",
+    "serverless-offline-sns": "^0.78.1",
+    "serverless-offline-sqs": "^8.0.0",
+    "serverless-prune-plugin": "^2.1.0",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",

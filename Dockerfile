@@ -30,7 +30,7 @@ WORKDIR /usr/src/app
 
 # Copy from build stage
 COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/dist/src ./dist
 
 EXPOSE 3000
 

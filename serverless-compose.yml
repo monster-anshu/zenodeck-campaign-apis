@@ -1,0 +1,3 @@
+services:
+  campaign-apis:
+    path: services/apis
