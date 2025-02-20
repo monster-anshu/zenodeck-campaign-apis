@@ -15,6 +15,21 @@ export class CampaignService {
     private readonly campaignModel: Model<Campaign>
   ) {}
 
+  async getById(appId: string, userId: string, id: string) {
+    const campaign = await this.campaignModel
+      .findOne({
+        appId: appId,
+        _id: id,
+      })
+      .lean();
+
+    if (!campaign) {
+      throw new NotFoundException('CAMPAIGN_NOT_FOUND');
+    }
+
+    return campaign;
+  }
+
   async create(
     appId: string,
     userId: string,
