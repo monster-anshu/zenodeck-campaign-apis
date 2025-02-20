@@ -46,7 +46,7 @@ export class CampaignService {
     return campaigns;
   }
 
-  async getById(appId: string, userId: string, id: string) {
+  async getById(appId: string, id: string) {
     const campaign = await this.campaignModel
       .findOne({
         appId: appId,
@@ -75,7 +75,7 @@ export class CampaignService {
       leadListId: leadList._id,
       name: name,
       time: time,
-      status: 'STATUS',
+      status: 'ACTIVE',
     });
 
     return campaign.toObject();
@@ -95,7 +95,7 @@ export class CampaignService {
       set.leadListId = leadList._id;
     }
 
-    const campiagn = await this.campaignModel
+    const campaign = await this.campaignModel
       .findOneAndUpdate(
         {
           appId: appId,
@@ -109,15 +109,15 @@ export class CampaignService {
       )
       .lean();
 
-    if (!campiagn) {
+    if (!campaign) {
       throw new NotFoundException('CAMPAIGN_NOT_FOUND');
     }
 
-    return campiagn;
+    return campaign;
   }
 
   async delete(appId: string, id: string) {
-    const campiagn = await this.campaignModel
+    const campaign = await this.campaignModel
       .findOneAndUpdate(
         {
           appId: appId,
@@ -133,7 +133,7 @@ export class CampaignService {
       )
       .lean();
 
-    if (!campiagn) {
+    if (!campaign) {
       throw new NotFoundException('CAMPAIGN_NOT_FOUND');
     }
 
