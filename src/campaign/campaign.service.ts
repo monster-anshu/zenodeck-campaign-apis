@@ -20,6 +20,7 @@ export class CampaignService {
       .findOne({
         appId: appId,
         _id: id,
+        status: 'ACTIVE',
       })
       .lean();
 
@@ -43,6 +44,7 @@ export class CampaignService {
       leadListId: leadList._id,
       name: name,
       time: time,
+      status: 'STATUS',
     });
 
     return campaign.toObject();
@@ -67,6 +69,7 @@ export class CampaignService {
         {
           appId: appId,
           id: id,
+          status: 'ACTIVE',
         },
         {
           $set: set,
@@ -80,5 +83,29 @@ export class CampaignService {
     }
 
     return campiagn;
+  }
+
+  async delete(appId: string, id: string) {
+    const campiagn = await this.campaignModel
+      .findOneAndUpdate(
+        {
+          appId: appId,
+          id: id,
+          status: 'ACTIVE',
+        },
+        {
+          $set: {
+            status: 'DELETED',
+          },
+        },
+        { new: true }
+      )
+      .lean();
+
+    if (!campiagn) {
+      throw new NotFoundException('CAMPAIGN_NOT_FOUND');
+    }
+
+    return true;
   }
 }

@@ -1,5 +1,7 @@
 import { InferSchemaType, Schema } from 'mongoose';
 
+const CAMPAIGN_STATUS = ['ACTIVE', 'DELETED'] as const;
+
 export const CampaignSchema = new Schema(
   {
     appId: {
@@ -12,6 +14,11 @@ export const CampaignSchema = new Schema(
       type: Schema.Types.ObjectId,
     },
     name: {
+      required: true,
+      type: String,
+    },
+    status: {
+      enum: CAMPAIGN_STATUS,
       required: true,
       type: String,
     },
