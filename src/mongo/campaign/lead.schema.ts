@@ -1,4 +1,5 @@
 import { InferSchemaType, Schema } from 'mongoose';
+import { MONGO_CONNECTION } from '../connections';
 
 const LEAD_STATUS = ['ACTIVE', 'DELETED'] as const;
 
@@ -32,7 +33,10 @@ const LeadSchema = new Schema(
 
 // LeadSchema.index({ leadListId: 1, email: 1 }, { unique: true });
 
-const LeadSchemaName = 'lead';
-type Lead = InferSchemaType<typeof LeadSchema>;
+export const LeadSchemaName = 'lead';
+export const LeadModel = MONGO_CONNECTION.DEFAULT.model(
+  LeadSchemaName,
+  LeadSchema
+);
 
-export { Lead, LeadSchema, LeadSchemaName };
+export type Lead = InferSchemaType<typeof LeadSchema>;

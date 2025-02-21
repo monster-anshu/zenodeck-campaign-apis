@@ -1,11 +1,12 @@
 import { InferSchemaType, Schema } from 'mongoose';
+import { MONGO_CONNECTION } from '../connections';
 
 export const EmailEvent = {
   OPEN: 'OPEN',
   CLICK: 'CLICK',
 } as const;
 
-export const EmailEventSchema = new Schema(
+const EmailEventSchema = new Schema(
   {
     appId: {
       required: true,
@@ -28,14 +29,14 @@ export const EmailEventSchema = new Schema(
   }
 );
 
-export const EmailOpenEventSchema = new Schema({
+const EmailOpenEventSchema = new Schema({
   count: {
     default: 0,
     type: Number,
   },
 });
 
-export const EmailLinkClickEventSchema = new Schema({
+const EmailLinkClickEventSchema = new Schema({
   count: {
     default: 0,
     type: Number,
@@ -47,6 +48,19 @@ export const EmailLinkClickEventSchema = new Schema({
 });
 
 export const EmailEventSchemaName = 'emailevent';
+
+const EmailEventModel = MONGO_CONNECTION.DEFAULT.model(
+  EmailEventSchemaName,
+  EmailEventSchema
+);
+export const EmailOpenEventModel = EmailEventModel.discriminator(
+  EmailEvent.OPEN,
+  EmailOpenEventSchema
+);
+export const EmailLinkClickEventModel = EmailEventModel.discriminator(
+  EmailEvent.CLICK,
+  EmailLinkClickEventSchema
+);
 
 export type EmailEvent = InferSchemaType<typeof EmailEventSchema>;
 export type EmailOpenEvent = EmailEvent &

@@ -2,13 +2,20 @@ import { Module } from '@nestjs/common';
 import { CredentialModule } from '~/credential/credential.module';
 import { HistoryModule } from '~/history/history.module';
 import { MailModule } from '~/mail/mail.module';
-import { EmailEventFeature } from '~/public/public.module';
+import {
+  EmailLinkClickModelProvider,
+  EmailOpenEventModelProvider,
+} from '~/mongo/campaign/nest';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
 @Module({
-  providers: [DashboardService],
+  providers: [
+    DashboardService,
+    EmailOpenEventModelProvider,
+    EmailLinkClickModelProvider,
+  ],
   controllers: [DashboardController],
-  imports: [MailModule, CredentialModule, HistoryModule, EmailEventFeature],
+  imports: [MailModule, CredentialModule, HistoryModule],
 })
 export class DashboardModule {}

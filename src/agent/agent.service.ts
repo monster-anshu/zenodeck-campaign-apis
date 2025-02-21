@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Agent, AgentDetails, AgentSchemaName } from '~/mongo/campaign';
+import { Inject, Injectable } from '@nestjs/common';
+import { Agent, AgentDetails } from '~/mongo/campaign';
+import { AgentModelProvider } from '~/mongo/campaign/nest';
 import UserModel from '~/mongo/common/schema/User';
 import { User } from '~/mongo/common/types';
-import { ConnectionName } from '~/mongo/connections';
 import { RoleService } from '~/role/role.service';
 
 @Injectable()
@@ -28,8 +26,8 @@ export class AgentService {
 
   constructor(
     private readonly roleService: RoleService,
-    @InjectModel(AgentSchemaName, ConnectionName.DEFAULT)
-    private agentModel: Model<Agent>
+    @Inject(AgentModelProvider.provide)
+    private agentModel: typeof AgentModelProvider.useValue
   ) {}
 
   async createAgents({

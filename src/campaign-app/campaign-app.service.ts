@@ -1,17 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, ProjectionType, Types } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
+import { ProjectionType, Types } from 'mongoose';
 import { encrypt } from '~/lib/crypto';
 import { randomString } from '~/lib/random';
-import { CampaignApp, CampaignAppSchemaName } from '~/mongo/campaign';
+import { CampaignApp } from '~/mongo/campaign';
+import { CampaignAppModelProvider } from '~/mongo/campaign/nest';
 import CompanyProductModel from '~/mongo/common/schema/CompanyProduct';
-import { ConnectionName } from '~/mongo/connections';
 
 @Injectable()
 export class CampaignAppService {
   constructor(
-    @InjectModel(CampaignAppSchemaName, ConnectionName.DEFAULT)
-    private campaignAppModel: Model<CampaignApp>
+    @Inject(CampaignAppModelProvider.provide)
+    private campaignAppModel: typeof CampaignAppModelProvider.useValue
   ) {}
 
   async createDefault({

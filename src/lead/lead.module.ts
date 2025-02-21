@@ -1,18 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { LeadSchema, LeadSchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { LeadModelProvider } from '~/mongo/campaign/nest';
 import { LeadController } from './lead.controller';
 import { LeadService } from './lead.service';
 
-export const LeadFeature = MongooseModule.forFeature(
-  [{ name: LeadSchemaName, schema: LeadSchema }],
-  ConnectionName.DEFAULT
-);
-
 @Module({
-  imports: [LeadFeature],
-  providers: [LeadService],
+  providers: [LeadService, LeadModelProvider],
   controllers: [LeadController],
   exports: [LeadService],
 })

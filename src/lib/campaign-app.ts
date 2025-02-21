@@ -1,17 +1,7 @@
 import { Types } from 'mongoose';
-import {
-  CampaignAppEncryption,
-  CampaignAppSchema,
-  CampaignAppSchemaName,
-} from '~/mongo/campaign';
+import { CampaignAppEncryption, CampaignAppModel } from '~/mongo/campaign';
 import { MONGO_CONNECTION } from '~/mongo/connections';
 import { decrypt } from './crypto';
-
-//TODO: remove this and use DI
-export const CampaignAppModel = MONGO_CONNECTION.DEFAULT.model(
-  CampaignAppSchemaName,
-  CampaignAppSchema
-);
 
 type GetAppEncryptionKeyOptions =
   | {

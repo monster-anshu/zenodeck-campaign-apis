@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 export const PORT = +(process.env.PORT || 3000);
 export const STAGE = process.env.STAGE as string;
+export const NODE_ENV = process.env.NODE_ENV;
 
 export const CAMPAIGN_APP_API_KEY = process.env.CAMPAIGN_APP_API_KEY as string;
 export const CAMPAIGN_API_URL = process.env.CAMPAIGN_API_URL as string;
@@ -20,3 +21,9 @@ export const S3_HOST = process.env.S3_HOST as string;
 export const S3_TEMP_BUCKET = process.env.S3_TEMP_BUCKET as string;
 export const S3_CAMPAIGN_UPLOAD_BUCKET = process.env
   .S3_CAMPAIGN_UPLOAD_BUCKET as string;
+
+export const COMMON_QUEUE_URL = process.env.COMMON_QUEUE_URL;
+export const COMMON_FIFO_QUEUE_URL = process.env.COMMON_FIFO_QUEUE_URL;
+
+export const AWS_REGION = 'us-east-1';
+export const IS_OFFLINE = process.env.IS_OFFLINE === 'true';

@@ -1,15 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import dayjs from '~/lib/dayjs';
-import { History, HistorySchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { History } from '~/mongo/campaign';
+import { HistoryModelProvider } from '~/mongo/campaign/nest';
 
 @Injectable()
 export class HistoryService {
   constructor(
-    @InjectModel(HistorySchemaName, ConnectionName.DEFAULT)
-    private readonly historyModel: Model<History>
+    @Inject(HistoryModelProvider.provide)
+    private readonly historyModel: typeof HistoryModelProvider.useValue
   ) {}
 
   async getById(historyId: string) {

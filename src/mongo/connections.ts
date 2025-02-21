@@ -23,8 +23,3 @@ MONGO_CONNECTION.DEFAULT.on('connected', function () {
 MONGO_CONNECTION.COMMON.on('connected', function () {
   console.log('Mongoose: common connection opened');
 });
-
-export const ConnectionName = {
-  DEFAULT: 'DEFAULT',
-  COMMON: 'COMMON',
-} as const;

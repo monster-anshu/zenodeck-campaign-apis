@@ -1,9 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { LeadService } from '~/lead/lead.service';
-import { LeadList, LeadListName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { LeadListModelProvider } from '~/mongo/campaign/nest';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
 import { UpadteLeadListDto } from './dto/update-lead-list.dto';
@@ -12,8 +10,8 @@ import { UpadteLeadListDto } from './dto/update-lead-list.dto';
 export class LeadsListService {
   constructor(
     private readonly leadService: LeadService,
-    @InjectModel(LeadListName, ConnectionName.DEFAULT)
-    private readonly leadListModel: Model<LeadList>
+    @Inject(LeadListModelProvider.provide)
+    private readonly leadListModel: typeof LeadListModelProvider.useValue
   ) {}
 
   async list(appId: string) {

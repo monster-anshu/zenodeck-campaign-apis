@@ -1,8 +1,9 @@
 import { InferSchemaType, Schema } from 'mongoose';
+import { MONGO_CONNECTION } from '../connections';
 
 const CAMPAIGN_STATUS = ['ACTIVE', 'DELETED'] as const;
 
-export const CampaignSchema = new Schema(
+const CampaignSchema = new Schema(
   {
     appId: {
       required: true,
@@ -33,5 +34,10 @@ export const CampaignSchema = new Schema(
   }
 );
 
-export type Campaign = InferSchemaType<typeof CampaignSchema>;
 export const CampaignSchemaName = 'campaign';
+export const CampaignModel = MONGO_CONNECTION.DEFAULT.model(
+  CampaignSchemaName,
+  CampaignSchema
+);
+
+export type Campaign = InferSchemaType<typeof CampaignSchema>;

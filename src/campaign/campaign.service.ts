@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { FilterQuery, Types } from 'mongoose';
 import { LeadsListService } from '~/lead-list/lead-list.service';
-import { Campaign, CampaignSchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { Campaign } from '~/mongo/campaign';
+import { CampaignModelProvider } from '~/mongo/campaign/nest';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { ListCampaignDto } from './dto/list-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
@@ -12,8 +11,8 @@ import { UpdateCampaignDto } from './dto/update-campaign.dto';
 export class CampaignService {
   constructor(
     private readonly leadListService: LeadsListService,
-    @InjectModel(CampaignSchemaName, ConnectionName.DEFAULT)
-    private readonly campaignModel: Model<Campaign>
+    @Inject(CampaignModelProvider.provide)
+    private readonly campaignModel: typeof CampaignModelProvider.useValue
   ) {}
 
   async list(appId: string, { limit, after, q }: ListCampaignDto) {

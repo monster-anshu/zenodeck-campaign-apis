@@ -1,26 +1,14 @@
 import { Global, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AgentSchema, AgentSchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { AgentModelProvider } from '~/mongo/campaign/nest';
 import { RoleModule } from '~/role/role.module';
 import { AgentController } from './agent.controller';
 import { AgentService } from './agent.service';
 
-const AgentFeature = MongooseModule.forFeature(
-  [
-    {
-      name: AgentSchemaName,
-      schema: AgentSchema,
-    },
-  ],
-  ConnectionName.DEFAULT
-);
-
 @Global()
 @Module({
   controllers: [AgentController],
-  providers: [AgentService],
+  providers: [AgentModelProvider, AgentService],
   exports: [AgentService],
-  imports: [AgentFeature, RoleModule],
+  imports: [RoleModule],
 })
 export class AgentModule {}
