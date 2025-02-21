@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { CampaignAppService } from '~/campaign-app/campaign-app.service';
 import { CredentialService } from '~/credential/credential.service';
 import { HistoryService } from '~/history/history.service';
 import dayjs from '~/lib/dayjs';
-import { EmailEvent, EmailLinkClick, EmailOpenEvent } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import {
+  EmailLinkClickModelProvider,
+  EmailOpenEventModelProvider,
+} from '~/mongo/campaign/nest';
 
 @Injectable()
 export class DashboardService {
@@ -14,10 +15,10 @@ export class DashboardService {
     private readonly historyService: HistoryService,
     private readonly credentialService: CredentialService,
     private readonly campaignAppService: CampaignAppService,
-    @InjectModel(EmailEvent.OPEN, ConnectionName.DEFAULT)
-    private readonly emailOpenModel: Model<EmailOpenEvent>,
-    @InjectModel(EmailEvent.CLICK, ConnectionName.DEFAULT)
-    private readonly emailClickModel: Model<EmailLinkClick>
+    @Inject(EmailOpenEventModelProvider.provide)
+    private readonly emailOpenModel: typeof EmailOpenEventModelProvider.useValue,
+    @Inject(EmailLinkClickModelProvider.provide)
+    private readonly emailClickModel: typeof EmailLinkClickModelProvider.useValue
   ) {}
 
   async get(appId: string) {

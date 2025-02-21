@@ -1,4 +1,5 @@
 import { InferSchemaType, Schema } from 'mongoose';
+import { MONGO_CONNECTION } from '../connections';
 
 export const Actions = [
   'CREATE',
@@ -17,7 +18,6 @@ const ActionSchema = {
   enum: Actions,
 };
 
-// permission data
 const PermissionSchema = new Schema<Permission>(
   {
     USER: [ActionSchema],
@@ -29,8 +29,7 @@ const PermissionSchema = new Schema<Permission>(
   }
 );
 
-// roles
-export const RoleSchema = new Schema(
+const RoleSchema = new Schema(
   {
     name: {
       type: String,
@@ -66,10 +65,14 @@ RoleSchema.path('permissions').transform(function (value: Permission) {
   return value;
 });
 
+export const RoleSchemaName = 'role';
+export const RoleModel = MONGO_CONNECTION.DEFAULT.model(
+  RoleSchemaName,
+  RoleSchema
+);
+
 export type FullPermission = Record<SubjectType, ActionType[]>;
 export type Permission = Partial<FullPermission>;
 export type Role = InferSchemaType<typeof RoleSchema>;
 export type SubjectType = (typeof Subjects)[number];
 export type ActionType = (typeof Actions)[number];
-
-export const RoleSchemaName = 'role';

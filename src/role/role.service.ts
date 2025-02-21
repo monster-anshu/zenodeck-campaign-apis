@@ -1,14 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { Role, RoleSchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { Inject, Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
+import { Role } from '~/mongo/campaign';
+import { RoleModelProvider } from '~/mongo/campaign/nest';
 
 @Injectable()
 export class RoleService {
   constructor(
-    @InjectModel(RoleSchemaName, ConnectionName.DEFAULT)
-    private roleModel: Model<Role>
+    @Inject(RoleModelProvider.provide)
+    private roleModel: typeof RoleModelProvider.useValue
   ) {}
 
   async createDefault(appId: string, userId: string) {

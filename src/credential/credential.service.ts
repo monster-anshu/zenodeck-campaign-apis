@@ -1,14 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { getAppEncryptionKey } from '~/lib/campaign-app';
 import { encryptDescryptJsonUsingKeyIv } from '~/lib/crypto/json';
-import {
-  CampaignAppEncryption,
-  Credential,
-  CredentialSchemaName,
-} from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { CampaignAppEncryption, Credential } from '~/mongo/campaign';
+import { CredentialModelProvider } from '~/mongo/campaign/nest';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
@@ -25,8 +19,8 @@ export class CredentialService {
   };
 
   constructor(
-    @InjectModel(CredentialSchemaName, ConnectionName.DEFAULT)
-    private credentialModel: Model<Credential>
+    @Inject(CredentialModelProvider.provide)
+    private credentialModel: typeof CredentialModelProvider.useValue
   ) {}
 
   async list(appId: string, campaignApp?: CampaignAppEncryption | null) {

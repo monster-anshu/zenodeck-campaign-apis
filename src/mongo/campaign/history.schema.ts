@@ -1,6 +1,7 @@
 import { InferSchemaType, Schema } from 'mongoose';
+import { MONGO_CONNECTION } from '../connections';
 
-export const HistorySchema = new Schema(
+const HistorySchema = new Schema(
   {
     appId: {
       required: true,
@@ -33,5 +34,10 @@ export const HistorySchema = new Schema(
   }
 );
 
-export type History = InferSchemaType<typeof HistorySchema>;
 export const HistorySchemaName = 'history';
+export const HistoryModel = MONGO_CONNECTION.DEFAULT.model(
+  HistorySchemaName,
+  HistorySchema
+);
+
+export type History = InferSchemaType<typeof HistorySchema>;

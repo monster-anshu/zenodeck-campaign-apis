@@ -1,23 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 import { HistoryService } from '~/history/history.service';
 import {
-  EmailEvent,
-  EmailLinkClick,
-  EmailOpenEvent,
-} from '~/mongo/campaign/event.schema';
-
-import { ConnectionName } from '~/mongo/connections';
+  EmailLinkClickModelProvider,
+  EmailOpenEventModelProvider,
+} from '~/mongo/campaign/nest';
 
 @Injectable()
 export class PublicService {
   constructor(
     private readonly historyService: HistoryService,
-    @InjectModel(EmailEvent.OPEN, ConnectionName.DEFAULT)
-    private readonly emailOpenModel: Model<EmailOpenEvent>,
-    @InjectModel(EmailEvent.CLICK, ConnectionName.DEFAULT)
-    private readonly emailClickModel: Model<EmailLinkClick>
+    @Inject(EmailOpenEventModelProvider.provide)
+    private readonly emailOpenModel: typeof EmailOpenEventModelProvider.useValue,
+    @Inject(EmailLinkClickModelProvider.provide)
+    private readonly emailClickModel: typeof EmailLinkClickModelProvider.useValue
   ) {}
 
   async track(trackId: string) {

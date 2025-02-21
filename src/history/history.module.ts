@@ -1,17 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { HistorySchema, HistorySchemaName } from '~/mongo/campaign';
-import { ConnectionName } from '~/mongo/connections';
+import { HistoryModelProvider } from '~/mongo/campaign/nest';
 import { HistoryService } from './history.service';
 
-const HistoryFeature = MongooseModule.forFeature(
-  [{ name: HistorySchemaName, schema: HistorySchema }],
-  ConnectionName.DEFAULT
-);
-
 @Module({
-  imports: [HistoryFeature],
-  providers: [HistoryService],
-  exports: [HistoryService, HistoryFeature],
+  imports: [],
+  providers: [HistoryService, HistoryModelProvider],
+  exports: [HistoryService],
 })
 export class HistoryModule {}
