@@ -10,14 +10,14 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
   plugins: [
     'serverless-deployment-bucket',
     'serverless-prune-plugin',
-    'serverless-offline',
     'serverless-offline-sqs',
-    'serverless-offline-sns',
+    'serverless-offline',
   ],
   build: {
     esbuild: {
       external: ['@aws-sdk/*'],
       sourcemap: false,
+      minify: true,
     },
   },
   custom: {
@@ -33,10 +33,11 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
     },
     'serverless-offline-sqs': {
       autoCreate: true,
-      apiVersion: '2012-11-05',
       endpoint: 'http://0.0.0.0:9324',
-      region: 'us-east-1',
+      region: '${self:provider.region}',
       skipCacheInvalidation: false,
+      accessKeyId: 'root',
+      secretAccessKey: 'root',
     },
   },
   provider: {
@@ -95,6 +96,7 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
+          QueueName: 'commonQueue',
           VisibilityTimeout: 15 * 60,
           MessageRetentionPeriod: 1209600,
           ReceiveMessageWaitTimeSeconds: 20,
@@ -103,6 +105,7 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonFifoQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
+          QueueName: 'commonFifoQueue',
           FifoQueue: true,
           VisibilityTimeout: 15 * 60,
           MessageRetentionPeriod: 1209600,
