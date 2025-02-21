@@ -4,13 +4,13 @@ import type { BuildOptions } from 'esbuild';
 import * as functions from './functions/index';
 
 const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
-  service: 'campaign-apis',
+  service: 'zenodeck-campaign-apis',
   frameworkVersion: '4',
   useDotenv: true,
   plugins: [
     'serverless-deployment-bucket',
     'serverless-prune-plugin',
-    'serverless-offline-sqs',
+    // 'serverless-offline-sqs',
     'serverless-offline',
   ],
   build: {
@@ -96,7 +96,6 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'commonQueue',
           VisibilityTimeout: 15 * 60,
           MessageRetentionPeriod: 1209600,
           ReceiveMessageWaitTimeSeconds: 20,
@@ -105,7 +104,6 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonFifoQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'commonFifoQueue',
           FifoQueue: true,
           VisibilityTimeout: 15 * 60,
           MessageRetentionPeriod: 1209600,

@@ -15,13 +15,13 @@ interface LambdaDef {
 
 const LambdaFunctions: Record<string, LambdaDef> = {
   inviteUserToCompany: {
-    functionName: 'orufy-apis-user-' + STAGE + '-inviteUserToCompany',
+    functionName: 'zenodeck-user-service-' + STAGE + '-inviteUserToCompany',
   },
   resendInviteToCompany: {
-    functionName: 'orufy-apis-user-' + STAGE + '-resendInviteToCompany',
+    functionName: 'zenodeck-user-service-' + STAGE + '-resendInviteToCompany',
   },
   deleteInvitation: {
-    functionName: 'orufy-apis-user-' + STAGE + '-deleteInvitation',
+    functionName: 'zenodeck-user-service-' + STAGE + '-deleteInvitation',
   },
 };
 
