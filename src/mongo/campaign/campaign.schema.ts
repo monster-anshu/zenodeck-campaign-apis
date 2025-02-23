@@ -18,6 +18,7 @@ const CampaignSchema = new Schema(
       required: true,
       type: String,
     },
+    queueId: String,
     status: {
       enum: CAMPAIGN_STATUS,
       required: true,
