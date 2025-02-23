@@ -14,7 +14,7 @@ export const handler: SQSHandler = async (event) => {
     if (message.type === 'SEND_EMAIL') {
       await handleEmail(message, record.messageId);
     }
-    if (message.type === 'LEAD_LIST') {
+    if (message.type === 'SEND_TO_LEADS') {
       await handleLeadList(message, record.messageId);
     }
   });
