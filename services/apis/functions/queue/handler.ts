@@ -1,6 +1,7 @@
 import type { SQSHandler } from 'aws-lambda';
 import { handlerCampaignShedule } from '~/apis/handler/campaign.handler';
 import { handleEmail } from '~/apis/handler/email.handler';
+import { handleLeadList } from '~/apis/handler/lead-list.handler';
 
 export const handler: SQSHandler = async (event) => {
   const records = event.Records;
@@ -12,6 +13,9 @@ export const handler: SQSHandler = async (event) => {
     }
     if (message.type === 'SEND_EMAIL') {
       await handleEmail(message, record.messageId);
+    }
+    if (message.type === 'SEND_TO_LEADS') {
+      await handleLeadList(message, record.messageId);
     }
   });
 

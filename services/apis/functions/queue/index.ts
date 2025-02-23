@@ -3,7 +3,8 @@ import { LambdaFunction } from '~/types';
 
 export const campaignQueue: LambdaFunction = {
   handler: handlerPath(__dirname),
-  timeout: 30,
+  timeout: 60,
+  memorySize: 256,
   events: [
     {
       sqs: {

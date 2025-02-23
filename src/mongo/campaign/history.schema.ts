@@ -1,6 +1,8 @@
 import { InferSchemaType, Schema } from 'mongoose';
 import { MONGO_CONNECTION } from '../connections';
 
+const HISTORY_STATUS = ['SUCCESS', 'FAILED'] as const;
+
 const HistorySchema = new Schema(
   {
     appId: {
@@ -11,11 +13,17 @@ const HistorySchema = new Schema(
       required: true,
       type: Schema.Types.ObjectId,
     },
+    error: Schema.Types.Mixed,
     from: {
       required: true,
       type: String,
     },
     html: {
+      required: true,
+      type: String,
+    },
+    status: {
+      enum: HISTORY_STATUS,
       required: true,
       type: String,
     },

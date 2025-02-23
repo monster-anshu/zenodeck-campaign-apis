@@ -44,7 +44,22 @@ export const handleEmail = async (
       to: to,
     });
   } catch (error) {
-    console.log('unable to send email', messageId, error);
+    await HistoryModel.insertMany([
+      {
+        _id: new Types.ObjectId(historyId),
+        appId: new Types.ObjectId(appId),
+        credentialId: credential._id,
+        error: error,
+        from: from,
+        html: html,
+        status: 'FAILED',
+        subject: subject,
+        to: to,
+      },
+    ]).catch((error) => {
+      console.error('unable to save history', error);
+    });
+    console.error('unable to send email', error);
     return;
   }
 
@@ -57,6 +72,9 @@ export const handleEmail = async (
       html: html,
       subject: subject,
       to: to,
+      status: 'SUCCESS',
     },
-  ]);
+  ]).catch((error) => {
+    console.error('unable to save history', error);
+  });
 };
