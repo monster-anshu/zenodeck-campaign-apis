@@ -30,7 +30,6 @@ export const handleLeadList = async (
   messageId: string
 ) => {
   let nextCursor;
-
   do {
     let filter: FilterQuery<Lead> = {};
 
@@ -47,14 +46,10 @@ export const handleLeadList = async (
 
     const leads = await LeadModel.find(filter)
       .sort({ _id: -1 })
-      .limit(LIMIT + 1)
+      .limit(LIMIT)
       .lean();
 
-    if (leads.length > LIMIT) {
-      nextCursor = leads.at(-1)?._id.toString() || null;
-    } else {
-      nextCursor = null;
-    }
+    nextCursor = leads.at(-1)?._id.toString() || null;
 
     const messages: SendMailOptions[] = leads.map((lead) => {
       const { html, id } = generateHTML(projectData, lead.email);
