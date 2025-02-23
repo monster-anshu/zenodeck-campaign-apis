@@ -16,7 +16,7 @@ export type LeadListOptions = {
   type: 'SEND_TO_LEADS';
 };
 
-const LIMIT = 50;
+const LIMIT = 500;
 const CONCURRENCY_LIMIT = 10;
 
 export const handleLeadList = async (
@@ -45,7 +45,11 @@ export const handleLeadList = async (
     const leads = await LeadModel.find(filter, { _id: 1, email: 1 })
       .sort({ _id: -1 })
       .limit(LIMIT)
-      .lean();
+      .lean()
+      .catch((error) => {
+        console.error('unable to fetch leads', error);
+        return [];
+      });
 
     if (leads.length === 0) break;
 
@@ -67,6 +71,8 @@ export const handleLeadList = async (
             type: 'SEND_EMAIL',
           },
           type: 'COMMON_QUEUE',
+        }).catch((error) => {
+          console.error('unable to push to queue', error);
         });
       })
     );

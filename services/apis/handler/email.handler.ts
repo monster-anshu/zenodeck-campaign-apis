@@ -56,8 +56,10 @@ export const handleEmail = async (
         subject: subject,
         to: to,
       },
-    ]);
-    console.log('unable to send email', messageId, error);
+    ]).catch((error) => {
+      console.error('unable to save history', error);
+    });
+    console.error('unable to send email', error);
     return;
   }
 
@@ -72,5 +74,7 @@ export const handleEmail = async (
       to: to,
       status: 'SUCCESS',
     },
-  ]);
+  ]).catch((error) => {
+    console.error('unable to save history', error);
+  });
 };
