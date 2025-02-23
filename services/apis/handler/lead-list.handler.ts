@@ -1,4 +1,5 @@
 import { FilterQuery, Types } from 'mongoose';
+import pLimit from 'p-limit';
 import { generateHTML } from '~/grapejs/generate-html';
 import { pushToQueue } from '~/lib/lambda/sqs';
 import { Lead, LeadModel } from '~/mongo/campaign';
@@ -16,6 +17,7 @@ export type LeadListOptions = {
 };
 
 const LIMIT = 50;
+const CONCURRENCY_LIMIT = 10;
 
 export const handleLeadList = async (
   {
@@ -29,46 +31,45 @@ export const handleLeadList = async (
   }: LeadListOptions,
   messageId: string
 ) => {
-  let nextCursor;
+  let nextCursor: string | null = null;
+  const limit = pLimit(CONCURRENCY_LIMIT);
+
   do {
-    let filter: FilterQuery<Lead> = {};
-
-    if (nextCursor) {
-      filter._id = { $lt: new Types.ObjectId(nextCursor) };
-    }
-
-    filter = {
-      ...filter,
-      appId: appId,
-      leadListId: leadListId,
+    const filter: FilterQuery<Lead> = {
+      ...(nextCursor && { _id: { $lt: new Types.ObjectId(nextCursor) } }),
+      appId,
+      leadListId,
       status: 'ACTIVE',
     };
 
-    const leads = await LeadModel.find(filter)
+    const leads = await LeadModel.find(filter, { _id: 1, email: 1 })
       .sort({ _id: -1 })
       .limit(LIMIT)
       .lean();
 
-    nextCursor = leads.at(-1)?._id.toString() || null;
+    if (leads.length === 0) break;
 
-    const messages: SendMailOptions[] = leads.map((lead) => {
-      const { html, id } = generateHTML(projectData, lead.email);
-      return {
-        appId: appId,
-        credential: credential,
-        from: from,
-        historyId: id.toString(),
-        html: html,
-        name: name,
-        subject: subject,
-        to: lead.email,
-        type: 'SEND_EMAIL',
-      };
-    });
+    nextCursor = leads[leads.length - 1]._id.toString();
 
-    const promises = messages.map(async (message) => {
-      await pushToQueue({ message: message, type: 'COMMON_QUEUE' });
-    });
+    const promises = leads.map((lead) =>
+      limit(() => {
+        const { html, id } = generateHTML(projectData, lead.email);
+        return pushToQueue({
+          message: {
+            appId,
+            credential,
+            from,
+            historyId: id.toString(),
+            html,
+            name,
+            subject,
+            to: lead.email,
+            type: 'SEND_EMAIL',
+          },
+          type: 'COMMON_QUEUE',
+        });
+      })
+    );
 
     await Promise.all(promises);
   } while (nextCursor);

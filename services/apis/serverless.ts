@@ -59,6 +59,7 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       COMMON_QUEUE_URL: '${env:COMMON_QUEUE_URL}',
       MONGO_COMMON_URI: '${env:MONGO_COMMON_URI}',
       MONGO_DEFAULT_URI: '${env:MONGO_DEFAULT_URI}',
+      NODE_ENV: 'production',
       STAGE: '${opt:stage}',
       TZ: 'Asia/Kolkata',
     },

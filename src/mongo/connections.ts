@@ -1,25 +1,45 @@
-import mongoose from 'mongoose';
+import mongoose, { Connection } from 'mongoose';
 import { MONGO_COMMON_URI, MONGO_DEFAULT_URI, NODE_ENV } from '~/env';
 
 const isProd = NODE_ENV === 'production';
 
-if (!isProd) {
-  mongoose.set('debug', true);
-}
-
+mongoose.set('debug', !isProd);
 mongoose.set('runValidators', true);
 mongoose.set('strict', true);
 mongoose.set('autoIndex', !isProd);
 
-export const MONGO_CONNECTION = {
-  DEFAULT: mongoose.createConnection(MONGO_DEFAULT_URI),
-  COMMON: mongoose.createConnection(MONGO_COMMON_URI),
+const connectionsCache: Record<string, Connection> = {};
+
+const createConnection = (url: string, name: string) => {
+  if (connectionsCache[name]) return connectionsCache[name];
+
+  const conn = mongoose.createConnection(url, {
+    // Serverless-optimized settings
+    maxPoolSize: 5,
+    socketTimeoutMS: 30000,
+    connectTimeoutMS: 30000,
+    serverSelectionTimeoutMS: 5000,
+  });
+
+  conn.on('error', (err) => console.error(`Mongoose (${name}) error:`, err));
+  conn.on('disconnected', () =>
+    console.warn(`Mongoose (${name}) disconnected`)
+  );
+  conn.on('connected', () => console.log(`Mongoose (${name}) connected`));
+
+  connectionsCache[name] = conn;
+  return conn;
 };
 
-MONGO_CONNECTION.DEFAULT.on('connected', function () {
-  console.log('Mongoose: default connection opened');
-});
+export const MONGO_CONNECTION = {
+  DEFAULT: createConnection(MONGO_DEFAULT_URI, 'DEFAULT'),
+  COMMON: createConnection(MONGO_COMMON_URI, 'COMMON'),
+};
 
-MONGO_CONNECTION.COMMON.on('connected', function () {
-  console.log('Mongoose: common connection opened');
-});
+// Graceful shutdown
+const shutdown = async () => {
+  await MONGO_CONNECTION.DEFAULT.close();
+  await MONGO_CONNECTION.COMMON.close();
+  console.log('Mongoose connections closed');
+};
+process.on('SIGTERM', shutdown);
