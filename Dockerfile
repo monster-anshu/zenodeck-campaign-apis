@@ -33,6 +33,7 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist/src ./dist
 
 EXPOSE 3000
+ENV NODE_ENV=production
 
 # Start the server using the production build
 CMD [ "dist/main.js" ]
