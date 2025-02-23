@@ -54,6 +54,7 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
     logRetentionInDays: 1,
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      CAMPAIGN_API_URL: '${env:CAMPAIGN_API_URL}',
       COMMON_FIFO_QUEUE_URL: '${env:COMMON_FIFO_QUEUE_URL}',
       COMMON_QUEUE_URL: '${env:COMMON_QUEUE_URL}',
       MONGO_COMMON_URI: '${env:MONGO_COMMON_URI}',
