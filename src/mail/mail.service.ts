@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import grapesjs from 'grapesjs';
 import juice from 'juice';
 import { Types } from 'mongoose';
+import { SendMailOptions } from '~/apis/handler/email.handler';
 import { CredentialService } from '~/credential/credential.service';
 import { CAMPAIGN_API_URL } from '~/env';
 import { HistoryService } from '~/history/history.service';
 import { LeadService } from '~/lead/lead.service';
-import { CampaignAppEncryption, History } from '~/mongo/campaign';
-import { TransporterFactory } from '~/transporter/transporter';
+import { pushToQueue } from '~/lib/lambda/sqs';
+import { CampaignAppEncryption } from '~/mongo/campaign';
 import { SendMailDto } from './dto/send-mail.dto';
 
 @Injectable()
@@ -38,15 +39,6 @@ export class MailService {
       campaignApp
     );
 
-    const transporter = TransporterFactory.create({
-      privateKeys: credential.privateKeys as never,
-      type: credential.type,
-    });
-
-    if (!transporter) {
-      throw new BadRequestException('UNABLE_TO_CREATE_TRANSPORTER');
-    }
-
     let target: string[] = [];
 
     if (leadListId) {
@@ -60,38 +52,33 @@ export class MailService {
       target = Array.isArray(to) ? to : [to];
     }
 
-    const payloadWithHtml = target.map((to) => {
+    const credentialToSend = {
+      _id: credential._id.toString(),
+      privateKeys: credential.privateKeys,
+      type: credential.type,
+    } as SendMailOptions['credential'];
+
+    const messages: SendMailOptions[] = target.map((to) => {
       const { html, id } = this.generateHTML(projectData, to);
 
-      return { html, to, id };
+      return {
+        appId: appId,
+        credential: credentialToSend,
+        from: from,
+        historyId: id.toString(),
+        html: html,
+        name: name,
+        subject: subject,
+        to: to,
+        type: 'SEND_EMAIL',
+      };
     });
 
-    const history: (Omit<History, 'createdAt' | 'updatedAt'> & {
-      _id: Types.ObjectId;
-    })[] = [];
-
-    const promises = payloadWithHtml.map(async ({ html, to, id }) => {
-      await transporter.send({
-        from: from,
-        html: html,
-        subject: subject,
-        to: to,
-        name: name,
-      });
-
-      history.push({
-        appId: new Types.ObjectId(appId),
-        credentialId: credential._id,
-        from: from,
-        html: html,
-        subject: subject,
-        to: to,
-        _id: id,
-      });
+    const promises = messages.map(async (message) => {
+      await pushToQueue({ message: message, type: 'COMMON_QUEUE' });
     });
 
     await Promise.all(promises);
-    await this.historyService.create(history);
   }
 
   private generateHTML(projectData: string | object, to: string) {
