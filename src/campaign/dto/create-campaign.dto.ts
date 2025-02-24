@@ -8,6 +8,10 @@ export const CreateCampaignZod = z.object({
   description: z.string().trim().optional(),
   leadListId: MongoIdZod,
   time: z.coerce.date(),
+  from: z.string().email(),
+  subject: z.string().trim().nonempty(),
+  senderName: z.string().trim().nonempty().optional(),
+  projectData: z.string(),
 });
 
 const RefinedSchema = CreateCampaignZod.refine(

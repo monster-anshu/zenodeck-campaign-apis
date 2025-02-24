@@ -42,13 +42,12 @@ export const handlerCampaignShedule = async (
   const message: LeadListOptions = {
     appId: campaign.appId.toString(),
     credential: credentialToSend,
+    from: campaign.from,
     leadListId: campaign.leadListId.toString(),
+    name: campaign.senderName || undefined,
+    projectData: campaign.projectData,
+    subject: campaign.subject,
     type: 'SEND_TO_LEADS',
-    // need to get
-    name: '',
-    projectData: '',
-    from: '',
-    subject: '',
   };
 
   await pushToQueue({

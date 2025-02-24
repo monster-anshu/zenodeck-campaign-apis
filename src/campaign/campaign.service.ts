@@ -66,7 +66,17 @@ export class CampaignService {
   async create(
     appId: string,
     userId: string,
-    { leadListId, name, time, description, credentialId }: CreateCampaignDto
+    {
+      leadListId,
+      name,
+      time,
+      description,
+      credentialId,
+      from,
+      projectData,
+      subject,
+      senderName,
+    }: CreateCampaignDto
   ) {
     const [leadList, credential] = await Promise.all([
       this.leadListService.getById(appId, leadListId),
@@ -77,10 +87,14 @@ export class CampaignService {
       appId: appId,
       credentialId: credential._id,
       description: description,
+      from: from,
       leadListId: leadList._id,
       name: name,
-      time: time,
+      projectData: projectData,
+      senderName: senderName,
       status: 'ACTIVE',
+      subject: subject,
+      time: time,
     });
 
     return campaign.toObject();

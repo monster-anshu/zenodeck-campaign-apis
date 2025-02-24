@@ -14,6 +14,10 @@ const CampaignSchema = new Schema(
       type: Schema.Types.ObjectId,
     },
     description: String,
+    from: {
+      required: true,
+      type: String,
+    },
     leadListId: {
       required: true,
       type: Schema.Types.ObjectId,
@@ -22,9 +26,18 @@ const CampaignSchema = new Schema(
       required: true,
       type: String,
     },
+    projectData: {
+      required: true,
+      type: String,
+    },
     queueId: String,
+    senderName: String,
     status: {
       enum: CAMPAIGN_STATUS,
+      required: true,
+      type: String,
+    },
+    subject: {
       required: true,
       type: String,
     },
