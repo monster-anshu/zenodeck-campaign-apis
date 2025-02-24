@@ -2,7 +2,10 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { FilterQuery, Types } from 'mongoose';
 import { ImportLeadDto } from '~/lead-list/dto/import-lead-list.dto';
 import { Lead } from '~/mongo/campaign';
-import { LeadModelProvider } from '~/mongo/campaign/nest';
+import {
+  CampaignModelProvider,
+  LeadModelProvider,
+} from '~/mongo/campaign/nest';
 import { ListLeadDto } from './dto/list-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 

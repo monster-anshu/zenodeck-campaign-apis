@@ -1,8 +1,16 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { getAppEncryptionKey } from '~/lib/campaign-app';
 import { encryptDescryptJsonUsingKeyIv } from '~/lib/crypto/json';
 import { CampaignAppEncryption, Credential } from '~/mongo/campaign';
-import { CredentialModelProvider } from '~/mongo/campaign/nest';
+import {
+  CampaignModelProvider,
+  CredentialModelProvider,
+} from '~/mongo/campaign/nest';
 import { AddCredentialDto } from './dto/add-credential.dto';
 import { EditCredentialDto } from './dto/edit-credential.dto';
 
@@ -20,7 +28,9 @@ export class CredentialService {
 
   constructor(
     @Inject(CredentialModelProvider.provide)
-    private credentialModel: typeof CredentialModelProvider.useValue
+    private credentialModel: typeof CredentialModelProvider.useValue,
+    @Inject(CampaignModelProvider.provide)
+    private campaignModel: typeof CampaignModelProvider.useValue
   ) {}
 
   async list(appId: string, campaignApp?: CampaignAppEncryption | null) {
@@ -167,6 +177,18 @@ export class CredentialService {
   }
 
   async delete(appId: string, id: string) {
+    const campaign = await this.campaignModel
+      .findOne({
+        appId: appId,
+        credentialId: id,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    if (campaign) {
+      throw new BadRequestException('CREDENTIAL_IN_USE');
+    }
+
     const credential = await this.credentialModel
       .findOneAndUpdate(
         {

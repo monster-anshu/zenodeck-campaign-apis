@@ -1,7 +1,15 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { LeadService } from '~/lead/lead.service';
-import { LeadListModelProvider } from '~/mongo/campaign/nest';
+import {
+  CampaignModelProvider,
+  LeadListModelProvider,
+} from '~/mongo/campaign/nest';
 import { CreateLeadListDto } from './dto/create-lead-list.dto';
 import { ImportLeadDto } from './dto/import-lead-list.dto';
 import { UpadteLeadListDto } from './dto/update-lead-list.dto';
@@ -11,7 +19,9 @@ export class LeadsListService {
   constructor(
     private readonly leadService: LeadService,
     @Inject(LeadListModelProvider.provide)
-    private readonly leadListModel: typeof LeadListModelProvider.useValue
+    private readonly leadListModel: typeof LeadListModelProvider.useValue,
+    @Inject(CampaignModelProvider.provide)
+    private campaignModel: typeof CampaignModelProvider.useValue
   ) {}
 
   async list(appId: string) {
@@ -66,6 +76,18 @@ export class LeadsListService {
   }
 
   async remove(appId: string, leadListId: string) {
+    const campaign = await this.campaignModel
+      .findOne({
+        appId: appId,
+        leadListId: leadListId,
+        status: 'ACTIVE',
+      })
+      .lean();
+
+    if (campaign) {
+      throw new BadRequestException('LEAD_LIST_IN_USE');
+    }
+
     const leadList = await this.leadListModel
       .findOneAndUpdate(
         {
