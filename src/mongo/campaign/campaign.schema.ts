@@ -9,6 +9,10 @@ const CampaignSchema = new Schema(
       required: true,
       type: Schema.ObjectId,
     },
+    credentialId: {
+      required: true,
+      type: Schema.Types.ObjectId,
+    },
     description: String,
     leadListId: {
       required: true,

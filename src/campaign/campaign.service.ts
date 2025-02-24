@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { FilterQuery, Types } from 'mongoose';
+import { CredentialService } from '~/credential/credential.service';
 import { LeadsListService } from '~/lead-list/lead-list.service';
 import { Campaign } from '~/mongo/campaign';
 import { CampaignModelProvider } from '~/mongo/campaign/nest';
@@ -11,6 +12,7 @@ import { UpdateCampaignDto } from './dto/update-campaign.dto';
 export class CampaignService {
   constructor(
     private readonly leadListService: LeadsListService,
+    private readonly credentialService: CredentialService,
     @Inject(CampaignModelProvider.provide)
     private readonly campaignModel: typeof CampaignModelProvider.useValue
   ) {}
@@ -64,12 +66,16 @@ export class CampaignService {
   async create(
     appId: string,
     userId: string,
-    { leadListId, name, time, description }: CreateCampaignDto
+    { leadListId, name, time, description, credentialId }: CreateCampaignDto
   ) {
-    const leadList = await this.leadListService.getById(appId, leadListId);
+    const [leadList, credential] = await Promise.all([
+      this.leadListService.getById(appId, leadListId),
+      this.credentialService.getById(appId, credentialId),
+    ]);
 
     const campaign = await this.campaignModel.create({
       appId: appId,
+      credentialId: credential._id,
       description: description,
       leadListId: leadList._id,
       name: name,
@@ -83,15 +89,22 @@ export class CampaignService {
   async update(
     appId: string,
     userId: string,
-    { id, leadListId, ...body }: UpdateCampaignDto
+    { id, leadListId, credentialId, ...body }: UpdateCampaignDto
   ) {
     const set: Partial<Campaign> = {};
 
     Object.assign(set, body);
 
-    if (leadListId) {
-      const leadList = await this.leadListService.getById(appId, leadListId);
-      set.leadListId = leadList._id;
+    if (leadListId || credentialId) {
+      const [leadList, credential] = await Promise.all([
+        leadListId ? this.leadListService.getById(appId, leadListId) : null,
+        credentialId
+          ? this.credentialService.getById(appId, credentialId)
+          : null,
+      ]);
+
+      leadList && (set.leadListId = leadList._id);
+      credential && (set.credentialId = credential._id);
     }
 
     const campaign = await this.campaignModel

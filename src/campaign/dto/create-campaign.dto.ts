@@ -4,6 +4,7 @@ import { MongoIdZod } from '~/lib/zod';
 
 export const CreateCampaignZod = z.object({
   name: z.string().trim().nonempty(),
+  credentialId: MongoIdZod,
   description: z.string().trim().optional(),
   leadListId: MongoIdZod,
   time: z.coerce.date(),
