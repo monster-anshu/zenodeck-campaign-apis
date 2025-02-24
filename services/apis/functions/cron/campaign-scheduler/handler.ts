@@ -1,3 +1,4 @@
+import { CampaignOptions } from '~/apis/handler/campaign.handler';
 import { pushToQueue } from '~/lib/lambda/sqs';
 import { CampaignModel } from '~/mongo/campaign';
 import { CAMPAIGN_SCHEDULER_CRON_DURATION } from '../config';
@@ -22,11 +23,13 @@ export const handler = async () => {
     const time = new Date(campaign.time);
     const delay = Math.ceil((time.getTime() - now.getTime()) / 1000);
 
+    const message: CampaignOptions = {
+      campaignId: campaign._id.toString(),
+      type: 'START_CAMPAIGN',
+    };
+
     const result = await pushToQueue({
-      message: {
-        type: 'START_CAMPAIGN',
-        campaignId: campaign._id,
-      },
+      message: message,
       config: {
         DelaySeconds: delay < 0 ? 0 : delay,
       },

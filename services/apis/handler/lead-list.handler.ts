@@ -17,7 +17,7 @@ export type LeadListOptions = {
 };
 
 const LIMIT = 500;
-const CONCURRENCY_LIMIT = 10;
+const CONCURRENCY_LIMIT = 200;
 
 export const handleLeadList = async (
   {
