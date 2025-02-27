@@ -9,7 +9,7 @@ export const handler: SQSHandler = async (event) => {
   const promises = records.map(async (record) => {
     const message = JSON.parse(record.body);
     if (message.type === 'START_CAMPAIGN') {
-      await handlerCampaignShedule(message.campaignId, record.messageId);
+      await handlerCampaignShedule(message, record.messageId);
     }
     if (message.type === 'SEND_EMAIL') {
       await handleEmail(message, record.messageId);
