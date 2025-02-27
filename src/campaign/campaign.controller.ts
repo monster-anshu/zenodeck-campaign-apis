@@ -75,7 +75,7 @@ export class CampaignController {
   async delete(
     @GetSession('appId') appId: string,
     @GetSession('userId') userId: string,
-    @Param(':id') id: string
+    @Param('id') id: string
   ) {
     await this.campaignService.delete(appId, id);
 

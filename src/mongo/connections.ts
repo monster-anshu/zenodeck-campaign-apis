@@ -15,10 +15,10 @@ const createConnection = (url: string, name: string) => {
 
   const conn = mongoose.createConnection(url, {
     // Serverless-optimized settings
-    maxPoolSize: 5,
-    socketTimeoutMS: 30000,
-    connectTimeoutMS: 30000,
-    serverSelectionTimeoutMS: 5000,
+    // maxPoolSize: 5,
+    // socketTimeoutMS: 30000,
+    // connectTimeoutMS: 30000,
+    // serverSelectionTimeoutMS: 5000,
   });
 
   conn.on('error', (err) => console.error(`Mongoose (${name}) error:`, err));
