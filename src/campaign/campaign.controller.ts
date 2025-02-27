@@ -35,7 +35,7 @@ export class CampaignController {
   }
 
   @Get(':id')
-  async getById(@GetSession('appId') appId: string, @Param(':id') id: string) {
+  async getById(@GetSession('appId') appId: string, @Param('id') id: string) {
     const campaign = await this.campaignService.getById(appId, id);
     return {
       isSuccess: true,
