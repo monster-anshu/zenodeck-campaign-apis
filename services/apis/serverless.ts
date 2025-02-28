@@ -100,14 +100,14 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          MaximumMessageSize: 1024 * 1024 * 2,
+          // MaximumMessageSize: 1024 * 1024 * 2,
         },
       },
       commonFifoQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
           FifoQueue: true,
-          MaximumMessageSize: 1024 * 1024 * 2,
+          // MaximumMessageSize: 1024 * 1024 * 2,
         },
       },
     },
