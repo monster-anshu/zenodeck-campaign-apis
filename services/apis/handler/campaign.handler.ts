@@ -12,6 +12,8 @@ export const handlerCampaignShedule = async (
   { campaignId }: CampaignOptions,
   messageId: string
 ) => {
+  console.info('fetching campaign', campaignId);
+
   const campaign = await CampaignModel.findOne({
     _id: campaignId,
     status: 'ACTIVE',
@@ -22,6 +24,7 @@ export const handlerCampaignShedule = async (
     return;
   }
 
+  console.info('fetching credential', campaign.credentialId);
   const credential = await CredentialModel.findOne({
     _id: campaign.credentialId,
     appId: campaign.appId,
@@ -50,6 +53,7 @@ export const handlerCampaignShedule = async (
     type: 'SEND_TO_LEADS',
   };
 
+  console.info('pushing to lead list queue', campaign.credentialId);
   await pushToQueue({
     message: message,
     type: 'COMMON_QUEUE',

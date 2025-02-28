@@ -34,6 +34,8 @@ export const handleLeadList = async (
   let nextCursor: string | null = null;
   const limit = pLimit(CONCURRENCY_LIMIT);
 
+  console.info('start fecting leads');
+
   do {
     const filter: FilterQuery<Lead> = {
       ...(nextCursor && { _id: { $lt: new Types.ObjectId(nextCursor) } }),
@@ -42,6 +44,7 @@ export const handleLeadList = async (
       status: 'ACTIVE',
     };
 
+    console.info('fecting leads next cursor', nextCursor);
     const leads = await LeadModel.find(filter, { _id: 1, email: 1 })
       .sort({ _id: -1 })
       .limit(LIMIT)
@@ -58,6 +61,8 @@ export const handleLeadList = async (
     const promises = leads.map((lead) =>
       limit(() => {
         const { html, id } = generateHTML(projectData, lead.email);
+
+        console.info('pushing to mail queue', nextCursor);
         return pushToQueue({
           message: {
             appId,

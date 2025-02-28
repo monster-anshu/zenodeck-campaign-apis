@@ -126,7 +126,7 @@ export class CampaignService {
       .findOneAndUpdate(
         {
           appId: appId,
-          id: id,
+          _id: id,
           status: 'ACTIVE',
         },
         {
@@ -148,7 +148,7 @@ export class CampaignService {
       .findOneAndUpdate(
         {
           appId: appId,
-          id: id,
+          _id: id,
           status: 'ACTIVE',
         },
         {

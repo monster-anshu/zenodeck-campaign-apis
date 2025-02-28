@@ -100,18 +100,14 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          VisibilityTimeout: 15 * 60,
-          MessageRetentionPeriod: 1209600,
-          ReceiveMessageWaitTimeSeconds: 20,
+          // MaximumMessageSize: 1024 * 1024 * 2,
         },
       },
       commonFifoQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
           FifoQueue: true,
-          VisibilityTimeout: 15 * 60,
-          MessageRetentionPeriod: 1209600,
-          ReceiveMessageWaitTimeSeconds: 20,
+          // MaximumMessageSize: 1024 * 1024 * 2,
         },
       },
     },
