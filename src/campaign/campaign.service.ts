@@ -42,7 +42,8 @@ export class CampaignService {
       .find(filter)
       .sort({ _id: -1 })
       .limit(limit)
-      .lean();
+      .lean()
+      .select('-projectData');
 
     return campaigns;
   }
