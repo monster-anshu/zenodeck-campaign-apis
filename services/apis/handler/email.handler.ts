@@ -36,6 +36,7 @@ export const handleEmail = async (
   }
 
   try {
+    console.info('sending mail');
     const result = await transporter.send({
       from: from,
       html: html,
@@ -44,6 +45,7 @@ export const handleEmail = async (
       to: to,
     });
   } catch (error) {
+    console.error('unable to send email', error);
     await HistoryModel.insertMany([
       {
         _id: new Types.ObjectId(historyId),
@@ -59,10 +61,10 @@ export const handleEmail = async (
     ]).catch((error) => {
       console.error('unable to save history', error);
     });
-    console.error('unable to send email', error);
     return;
   }
 
+  console.info('saving mail history');
   await HistoryModel.insertMany([
     {
       _id: new Types.ObjectId(historyId),
