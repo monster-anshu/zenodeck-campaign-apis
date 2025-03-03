@@ -10,7 +10,7 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
   plugins: [
     'serverless-deployment-bucket',
     'serverless-prune-plugin',
-    // 'serverless-offline-sqs',
+    'serverless-offline-sqs',
     'serverless-offline',
   ],
   build: {
@@ -100,14 +100,14 @@ const serverlessConfiguration: AWS & { build: { esbuild: BuildOptions } } = {
       commonQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          // MaximumMessageSize: 1024 * 1024 * 2,
+          QueueName: 'commonQueue',
         },
       },
       commonFifoQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
+          QueueName: 'commonFifoQueue',
           FifoQueue: true,
-          // MaximumMessageSize: 1024 * 1024 * 2,
         },
       },
     },

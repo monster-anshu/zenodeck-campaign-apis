@@ -62,7 +62,7 @@ export const handleLeadList = async (
       limit(() => {
         const { html, id } = generateHTML(projectData, lead.email);
 
-        console.info('pushing to mail queue', nextCursor);
+        console.info('pushing to mail queue', lead.email);
         return pushToQueue({
           message: {
             appId,

@@ -15,7 +15,8 @@
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/src/main"
+    "start:prod": "node dist/src/main",
+    "docker:start": "docker run --name Fake-SQS -d -p 9324:9324 -p 9325:9325 softwaremill/elasticmq-native"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.740.0",
